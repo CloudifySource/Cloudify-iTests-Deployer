@@ -1,5 +1,3 @@
-
-/credentials/
 /bin/
 /target/
 /tools/
@@ -11,4 +9,4 @@
 .classpath
 .project
 .idea/**
-Cloudify-iTests.iml
+**/*.iml
