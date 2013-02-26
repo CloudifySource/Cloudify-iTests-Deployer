@@ -13,8 +13,8 @@ import java.util.concurrent.Executors;
 
 
 
-config = new ConfigSlurper().parse(new File("cloudify-itests-service").toURL())
-serviceDir = System.getProperty("user.home") + "/cloudify-itests.properties"
+config = new ConfigSlurper().parse(new File("cloudify-itests.properties").toURL())
+serviceDir = System.getProperty("user.home") + "/cloudify-itests-service"
 new AntBuilder().sequential{
     mkdir(dir:serviceDir)
 }
@@ -67,4 +67,5 @@ results = pool.invokeAll([
     }])
 
 results.each { it.get() }
+
 pool.shutdown()
