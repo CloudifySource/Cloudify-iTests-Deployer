@@ -65,7 +65,8 @@ results = pool.invokeAll([
                     }
         }
     }])
-
-results.each { it.get() }
-
-pool.shutdown()
+try{
+    results.each { it.get() }
+} finally{
+    pool.shutdownNow()
+}
