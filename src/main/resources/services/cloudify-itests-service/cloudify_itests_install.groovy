@@ -6,7 +6,7 @@ import org.eclipse.jgit.storage.file.FileRepositoryBuilder
 
 import java.util.concurrent.Executors;
 /**
- * User: sagib
+ * User: Sagi Bernstein
  * Date: 10/02/13
  * Time: 12:05
  */
