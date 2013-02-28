@@ -13,7 +13,8 @@ service {
 
     lifecycle{
         init "cloudify_itests_install.groovy"
-        start "cloudify_itests_start.groovy"
+        postStart "cloudify_itests_postStart.groovy"
+        preStop "cloudify_itests_preStop.groovy"
         locator {
             NO_PROCESS_LOCATORS
         }

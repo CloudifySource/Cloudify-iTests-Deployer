@@ -1,3 +1,4 @@
+import org.cloudifysource.dsl.context.ServiceContextFactory
 import org.cloudifysource.dsl.utils.ServiceUtils
 
 /**
@@ -8,6 +9,7 @@ import org.cloudifysource.dsl.utils.ServiceUtils
 
 serviceDir = System.getProperty("user.home") + "/cloudify-itests-service"
 config = new ConfigSlurper().parse(new File("cloudify-itests.properties").toURL())
+context = ServiceContextFactory.getServiceContext()
 
 def buildDir = "${serviceDir}/${config.test.BUILD_DIR}"
 
@@ -30,7 +32,7 @@ def arguments = "test -e -X -U -P tgrid-sgtest-cloudify " +
         "-Djava.security.policy=policy/policy.all " +
         "-Djava.awt.headless=true " +
         "-Dsgtest.suiteName=${config.test.SUITE_NAME} " +
-        "-DiTests.suiteId=${config.test.SUITE_ID} " +
+        "-DiTests.suiteId=${context.instanceId}" +
         "-Dsgtest.summary.dir=${buildDir}/../${config.test.SUITE_NAME} " +
         "-DiTests.numOfSuites=${config.test.SUITE_NUMBER} " +
         "-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Jdk14Logger " +
@@ -44,27 +46,20 @@ def arguments = "test -e -X -U -P tgrid-sgtest-cloudify " +
         "-DipList=${config.test.BYON_MACHINES} " +
         "-Dsupported-clouds=${config.test.SUPPORTED_CLOUDS}"
 
-
-new AntBuilder().sequential{
-    chmod(dir:mvnBinDir, perm:'+x', includes:"**/*")
-    exec(executable: mvnExec,
-            failonerror:true,
-            dir:"${serviceDir}/${config.scm.projectName}") {
-        env(key: "SUITE_WORK_DIR", value: "${config.test.SUITE_WORK_DIR}")
-        env(key: "SUITE_DEPLOY_DIR", value: "${config.test.SUITE_DEPLOY_DIR}")
-        env(key: "EXT_JAVA_OPTIONS", value: prefix + "-Dcom.gs.work=${config.test.SUITE_WORK_DIR} -Dcom.gs.deploy=${config.test.SUITE_DEPLOY_DIR}")
-        arguments.split(" ").each { arg(value: it) }
-    }
-}
-
-def executeMaven (mvnExec, arguments, directory){
+try{
     new AntBuilder().sequential{
+        chmod(dir:mvnBinDir, perm:'+x', includes:"**/*")
         exec(executable: mvnExec,
-                failonerror:false,
-                dir:directory) {
+                failonerror:true,
+                dir:"${serviceDir}/${config.scm.projectName}") {
+            env(key: "SUITE_WORK_DIR", value: "${config.test.SUITE_WORK_DIR}")
+            env(key: "SUITE_DEPLOY_DIR", value: "${config.test.SUITE_DEPLOY_DIR}")
+            env(key: "EXT_JAVA_OPTIONS", value: prefix + "-Dcom.gs.work=${config.test.SUITE_WORK_DIR} -Dcom.gs.deploy=${config.test.SUITE_DEPLOY_DIR}")
             arguments.split(" ").each { arg(value: it) }
         }
     }
+}finally{
+    context.attributes.thisService.remove("testRunId")
 }
 
 executeMaven(mvnExec,
@@ -73,3 +68,4 @@ executeMaven(mvnExec,
 executeMaven(mvnExec,
         "exec:java -Dexec.mainClass=\"framework.testng.report.wiki.WikiReporter\" -Dexec.args=\"${config.test.SUITE_TYPE} ${config.test.BUILD_NUMBER} ${config.test.SUITE_NAME} ${config.test.MAJOR_VERSION} ${config.test.MINOR_VERSION} ${config.test.BUILD_LOG_URL}\" -Dcloudify.home=${buildDir}",
         "${serviceDir}/${config.scm.projectName}")
+

@@ -1,6 +1,10 @@
-@groovy.lang.Grab(group = "org.eclipse.jgit", module = "org.eclipse.jgit", version = "2.2.0.201212191850-r")
+@Grab(group = "org.eclipse.jgit", module = "org.eclipse.jgit", version = "2.2.0.201212191850-r")
 
+import com.gigaspaces.document.SpaceDocument
+
+import org.cloudifysource.dsl.context.ServiceContextFactory
 import org.cloudifysource.dsl.utils.ServiceUtils
+
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder
 
@@ -15,6 +19,9 @@ import java.util.concurrent.Executors;
 
 config = new ConfigSlurper().parse(new File("cloudify-itests.properties").toURL())
 serviceDir = System.getProperty("user.home") + "/cloudify-itests-service"
+def context = ServiceContextFactory.getServiceContext()
+
+
 new AntBuilder().sequential{
     mkdir(dir:serviceDir)
 }
@@ -70,3 +77,7 @@ try{
 } finally{
     pool.shutdownNow()
 }
+
+def indicator = new SpaceDocument()
+indicator.addProperties(["key" : config.test.TEST_RUN_ID])
+context.attributes.thisService["testRunId"] = indicator
