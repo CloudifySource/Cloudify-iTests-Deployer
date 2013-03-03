@@ -7,11 +7,9 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="groovy-2.1.1" level="application" />
-    <orderEntry type="library" name="gs-openspaces" level="project" />
     <orderEntry type="library" name="lib" level="project" />
+    <orderEntry type="library" name="org.eclipse.jgit:org.eclipse.jgit:2.2.0.201212191850-r" level="project" />
     <orderEntry type="library" name="dsl" level="project" />
-    <orderEntry type="library" name="gs-runtime" level="project" />
   </component>
 </module>
 

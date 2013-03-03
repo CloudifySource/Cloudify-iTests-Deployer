@@ -1,28 +1,81 @@
 package deployer
+@Grapes([
+    @GrabResolver(name = 'openspaces', root = 'http://maven-repository.openspaces.org'),
+    @Grab(group = "com.gigaspaces", module = "gs-openspaces", version = "9.5.0-SNAPSHOT"),
+    @Grab(group = "com.gigaspaces.quality", module = "DashboardReporter", version = "0.0.2-SNAPSHOT"),
+    @Grab(group = "org.jclouds.provider", module = "aws-s3", version = "1.5.3"),
+    @Grab(group = "javax.mail", module = "mail", version = "1.4.5"),
+    @Grab(group = "org.swift.common", module = "confluence-soap", version = "0.5"),
+    @Grab(group = "javax.xml", module = "jaxrpc-api", version = "1.1"),
+])
 
-@GrabResolver(name = 'openspaces', root = 'http://maven-repository.openspaces.org')
-@Grab(group = "com.gigaspaces", module = "gs-openspaces", version = "9.5.0-SNAPSHOT")
-@Grab(group = "com.gigaspaces.quality", module = "DashboardReporter", version = "0.0.2-SNAPSHOT")
-@Grab(group = "org.jclouds.provider", module = "aws-s3", version = "1.5.3")
-@Grab(group = "javax.mail", module = "mail", version = "1.4.5")
-@Grab(group = "org.swift.common", module = "confluence-soap", version = "0.5")
-@Grab(group = "javax.xml", module = "jaxrpc-api", version = "1.1")
 
-
-import com.gigaspaces.document.SpaceDocument
 import deployer.report.TestsReportMerger
 import deployer.report.wiki.WikiReporter
-import org.openspaces.core.GigaSpaceConfigurer
-import org.openspaces.core.space.UrlSpaceConfigurer
+import org.apache.tools.ant.DefaultLogger
+
+import java.util.logging.Logger
+
 
 /**
  * User: Sagi Bernstein
  * Date: 27/02/13
  * Time: 15:48
  */
+
+//variable definitions
+Logger logger = Logger.getLogger(this.getClass().getName())
 config= new ConfigSlurper().parse(new File("deployer.properties").toURL())
 def arguments = [:] as HashMap<String, String>
-def i = 0;
+def i = 0
+
+
+//function definitions
+def cp(from, to){
+    new AntBuilder().sequential{
+        copy(todir : to){
+            fileset(dir : from)
+        }
+    }
+}
+
+def replaceTextInFile(filePath, props){
+    def file = new File(filePath) as File
+    def propsText = file.text
+    for (it in props.keySet()) {
+        propsText = propsText.replace(it, props[it])
+    }
+    file.write(propsText)
+}
+
+
+
+def cloudify(arguments, capture){
+    def output = new ByteArrayOutputStream()
+    ant = new AntBuilder()
+    if (capture){
+        ant.project.getBuildListeners().each {
+            if(it instanceof DefaultLogger)
+                it.setOutputPrintStream(new PrintStream(output))
+        }
+    }
+    ant.sequential{
+        //arguments = "connent ${config.MGT_MACHINE};" + arguments
+        exec(executable: "./cloudify.sh",
+                failonerror:true,
+                dir:"${config.CLOUDIFY_HOME}/bin") {
+            arguments.split(" ").each { arg(value: it) }
+        }
+    }
+    return output.toString()
+}
+
+def cloudify(arguments){
+    cloudify(arguments, false)
+}
+
+
+
 
 arguments["<buildNumber>"] = args[i++]                                      //build.number
 arguments["<version>"] = args[i++]                                          //cloudify_product_version
@@ -48,59 +101,35 @@ arguments["<supported.clouds>"] = args[i++]                                 //sg
 
 arguments["testRunId"] = "${arguments["suite_name"]}-${System.currentTimeMillis()}"
 
-//copy service dir
-def originalServiceDir = "../resources/services/cloudify-itests-service"
-def cp(from, to){
-    new AntBuilder().sequential{
-        copy(todir : to){
-            fileset(dir : from)
-        }
-    }
-}
-
-cp(originalServiceDir, arguments["testRunId"])
-
-//copy credentials
-def credentialsDir = "${System.getProperty("user.home")}/someDir"
-cp(credentialsDir, "${arguments["testRunId"]}/credentials")
-
-//override properties
-def serviceProperties = new File("${arguments["testRunId"]}/cloudify-itests.properties") as File
-def propsText = serviceProperties.text
-arguments.keySet().each {
-    propsText = propsText.replace(it, arguments[it])
-}
-serviceProperties.write(propsText)
-
-//install service
-def cloudifysh (String arguments){
-    new AntBuilder().sequential{
-        exec(executable: "cloudify",
-                failonerror:true,
-                dir:"CLOIDUFY_HOME") {
-            arguments.split(" ").each { arg(value: it) }
-        }
-    }
-}
-
-cloudifysh("install-service ${System.getProperty("user.dir")}/${arguments["testRunId"]}")
-
-//poll for suite completion
-def spaceConfigurer = new UrlSpaceConfigurer("jini://HOST/*/testSpace?groups=MANAGEMENT_GROUP");
-def suiteSpace = new GigaSpaceConfigurer(spaceConfigurer).gigaSpace();
+logger.info "strating itests suite with id: ${arguments["testRunId"]}"
 
 
-def template = new SpaceDocument()
-template.addProperties(["key" : arguments["testRunId"]])
-while(suiteSpace.count(template) > 0){
+logger.info "copy service dir"
+cp "../resources/services/cloudify-itests-service", arguments["testRunId"]
+
+cp "${config.CREDENTIAL_DIR}", "${arguments["testRunId"]}/credentials"
+
+
+logger.info "configure test suite"
+def servicePropsPath = "${arguments["testRunId"]}/cloudify-itests.properties"
+replaceTextInFile servicePropsPath, arguments
+
+
+logger.info "install service"
+cloudify "install-service --verbose ${System.getProperty("user.dir")}/${arguments["testRunId"]}"
+
+logger.info "poll for suite completion"
+
+
+while(cloudify("list-attributes", true).count("${arguments["testRunId"]}") > 0){
     sleep(10 * 1000)
 }
 
-//uninstall service
-cloudifysh("uninstall-service ${arguments["testRunId"]}")
+logger.info "uninstall service"
+cloudify "uninstall-service --verbose ${arguments["testRunId"]}"
 
-//merge reports
-testConfig= new ConfigSlurper().parse(serviceProperties.toURL())
+logger.info "merge reports"
+testConfig = new ConfigSlurper().parse(new File(servicePropsPath).toURL())
 
 //TODO -Dcloudify.home=${buildDir}
 TestsReportMerger.main("${testConfig.test.SUITE_TYPE}",
@@ -117,24 +146,4 @@ WikiReporter.main("${testConfig.test.SUITE_TYPE}",
         "${testConfig.test.MINOR_VERSION}",
         "${testConfig.test.BUILD_LOG_URL}")
 
-return 0
-
-
-/*${vars.get("sgtest_client_machine1")}
-${vars.get("sgtest_gsa_machines1")}
-${vars.get("sgtest_client_machine2")}
-${vars.get("sgtest_gsa_machines2")}
-${vars.get("sgtest_client_machine3")}
-${vars.get("sgtest_gsa_machines3")}
-${vars.get("sgtest_client_machine4")}
-${vars.get("sgtest_gsa_machines4")}
-${vars.get("sgtest_client_machine5")}
-${vars.get("sgtest_gsa_machines5")}
-${vars.get("sgtest_client_machine6")}
-${vars.get("sgtest_gsa_machines6")}
-${vars.get("sgtest_client_machine7")}
-${vars.get("sgtest_gsa_machines7")}
-${vars.get("sgtest_client_machine8")}
-${vars.get("sgtest_gsa_machines8")}
-${vars.get("sgtest_byon_machines")}*/
-
+System.exit 0
