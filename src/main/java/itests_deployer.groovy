@@ -26,7 +26,9 @@ import java.util.logging.Logger
 
 //variable definitions
 Logger logger = Logger.getLogger(this.getClass().getName())
-config= new ConfigSlurper().parse(new File("deployer.properties").toURL())
+scriptDir = new File(getClass().protectionDomain.codeSource.location.path).parent
+deployerPropertiesFile = new File("deployer.properties")
+config= new ConfigSlurper().parse(deployerPropertiesFile.toURL())
 def props = [:] as Map<String, String>
 def i = 0
 
@@ -51,7 +53,7 @@ def replaceTextInFile(String filePath, Map<String, String> properties){
 
 
 
-def cloudify(String arguments, capture, shouldConnect){
+def cloudify(arguments, capture, shouldConnect){
     def output = new ByteArrayOutputStream()
     ant = new AntBuilder()
     if (capture){
@@ -67,13 +69,13 @@ def cloudify(String arguments, capture, shouldConnect){
         exec(executable: "./cloudify.sh",
                 failonerror:true,
                 dir:"${config.CLOUDIFY_HOME}/bin") {
-            arguments.split(" ").each { arg(value: it) }
+            arg(value: arguments)
         }
     }
     return output.toString()
 }
 
-def cloudify(String arguments){
+def cloudify(arguments){
     cloudify(arguments, false, true)
 }
 
@@ -106,8 +108,9 @@ props["testRunId"] = "${props["suite_name"]}-${System.currentTimeMillis()}"
 logger.info "checking if management machine is up"
 if (shouldBootstrap()){
     logger.info "management is down and should be bootstrapped"
-    cloudify "bootstrap --verbose ec2", false, false
-    cloudify "install-service ${config.MYSQL.serviceDir}", false, true
+    config.MGT_MACHINE = cloudify("bootstrap --verbose ec2", true, false).find("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}")
+    deployerPropertiesFile << config
+    cloudify "install-service ${scriptDir}/../resources/services/mysql", false, true
 }
 logger.info "management is up"
 
@@ -127,7 +130,7 @@ def serviceFilePath = "${props["testRunId"]}/cloudify-itests-service.groovy"
 replaceTextInFile serviceFilePath, ["<name>" : props["testRunId"], "<numInstances>" : props["<suite.number>"]]
 
 logger.info "install service"
-cloudify "install-service --verbose ${System.getProperty("user.dir")}/${props["testRunId"]}"
+cloudify "install-service --verbose ${scriptDir}/${props["testRunId"]}"
 
 logger.info "poll for suite completion"
 int count
@@ -139,7 +142,7 @@ while((count = cloudify("list-attributes", true, true).count(props["testRunId"])
 logger.info "uninstall service"
 cloudify "uninstall-service --verbose ${props["testRunId"]}"
 
-logger.info "merge reports"
+logger.info "TODO merge reports and send mail..."
 testConfig = new ConfigSlurper().parse(new File(servicePropsPath).toURL())
 
 System.exit 0
