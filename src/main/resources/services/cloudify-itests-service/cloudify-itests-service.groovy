@@ -10,6 +10,7 @@ service {
     icon "tgrid.jpg"
     type "WEB_SERVER"
     numInstances "<numInstances>"
+    maxAllowedInstances 1000
 
     lifecycle{
         init "cloudify_itests_install.groovy"
