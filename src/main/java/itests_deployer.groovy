@@ -106,7 +106,7 @@ props["build.logUrl"] = args[i++]                                       //build.
 props["<ec2.region>"] = args[i++]                                       //ec2_region
 props["<supported.clouds>"] = args[i++]                                 //sgtest_clouds
 props["testRunId"] = "${props["suite_name"]}-${System.currentTimeMillis()}"
-props["<credentials.folder>"] =
+
 
 logger.info "checking if management machine is up"
 if (shouldBootstrap()){
