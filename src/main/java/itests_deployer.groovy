@@ -108,7 +108,9 @@ logger.info "checking if management machine is up"
 if (shouldBootstrap()){
     logger.info "management is down and should be bootstrapped"
     config.MGT_MACHINE = cloudify("bootstrap --verbose ec2", true, false).find("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}")
-    deployerPropertiesFile << config
+    deployerPropertiesFile.withWriter {
+        writer -> config.writeTo(writer)
+    }
     cloudify "install-service ${scriptDir}/../resources/services/mysql", false, true
 }
 logger.info "management is up"
