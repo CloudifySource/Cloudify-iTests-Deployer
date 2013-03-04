@@ -28,7 +28,7 @@ import java.util.logging.Logger
 Logger logger = Logger.getLogger(this.getClass().getName())
 scriptDir = new File(getClass().protectionDomain.codeSource.location.path).parent
 commandOptions="--verbose -timeout 15"
-deployerPropertiesFile = new File("deployer.properties")
+deployerPropertiesFile = new File("${scriptDir}/deployer.properties")
 config= new ConfigSlurper().parse(deployerPropertiesFile.toURL())
 def props = [:] as Map<String, String>
 def i = 0
@@ -88,26 +88,24 @@ def shouldBootstrap(){
 
 
 
-/*props["package_name"] = args[i++]                                       //cloudify_package_name
-props["xap_jdk"] = args[i++]                                            //xap_jdk
-props["sgtest_jdk"] = args[i++]                                         //sgtest_jdk
-props["sgtest_jvm_settings"] = args[i++]                                //sgtest_jvm_settings
-props["branch_name"] = args[i++]                                        //branch_name
-props["<include>"] = args[i++]                                          //include_list
-props["<exclude>"] = args[i++]                                          //exclude_list
-props["build.logUrl"] = args[i++]                                       //build.logUrl
-props["<ec2.region>"] = args[i++]                                       //ec2_region
-props["<supported.clouds>"] = args[i++]                                 //sgtest_clouds*/
 
-
-
-props["<buildNumber>"] = args[i++]                                      //build.number
-props["<version>"] = args[i++]                                          //cloudify_product_version
-props["<milestone>"] = args[i++]                                        //milestone
-props["<milestoneUpperCase>"] = "SNAPSHOT"//props["<milestone>"].toUpperCase()      //milestone upper case
-props["<suite.number>"] = args[i++]                                     //suite_number
-props["<suite.name>"] = args[i++]                                       //suite_name
+props["<milestoneUpperCase>"] = "SNAPSHOT" //props["<milestone>"].toUpperCase()
+props["<buildNumber>"] = args[i++]         //0
+props["<version>"] = args[i++]             //1
+props["<milestone>"] = args[i++]           //2
+props["<suite.number>"] = args[i++]        //3
+props["<suite.name>"] = args[i++]          //4
+props["<include>"] = args[i++]             //5
+props["<exclude>"] = args[i++]             //6
+props["<ec2.region>"] = args[i++]          //7
+props["<supported.clouds>"] = args[i++]    //8
+props["<package.name>"] = args[i++]        //9
+props["<xap.jdk>"] = args[i++]             //10
+props["<sgtest.jdk>"] = args[i++]          //11
+props["<sgtest.jvm_settings>"] = args[i++] //12
+props["<branch.name>"] = args[i]           //13
 props["testRunId"] = "${props["<suite.name>"]}-${System.currentTimeMillis()}"
+
 
 logger.info "strating itests suite with id: ${props["testRunId"]}"
 
