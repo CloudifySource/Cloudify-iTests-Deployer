@@ -81,15 +81,13 @@ def cloudify(arguments){
 }
 
 def shouldBootstrap(){
-    def connectionStatus = cloudify("", true, true)
+    def connectionStatus = cloudify("connect -timeout 1 ${config.MGT_MACHINE}", true, false)
     return !connectionStatus.contains("Connected successfully")
 }
 
-/*props["<buildNumber>"] = args[i++]                                      //build.number
-props["<version>"] = args[i++]                                          //cloudify_product_version
-props["<milestone>"] = args[i++]                                        //milestone
-props["<milestoneUpperCase>"] = props["<milestone>"].toUpperCase()      //milestone upper case
-props["package_name"] = args[i++]                                       //cloudify_package_name
+
+
+/*props["package_name"] = args[i++]                                       //cloudify_package_name
 props["xap_jdk"] = args[i++]                                            //xap_jdk
 props["sgtest_jdk"] = args[i++]                                         //sgtest_jdk
 props["sgtest_jvm_settings"] = args[i++]                                //sgtest_jvm_settings
@@ -99,8 +97,15 @@ props["<exclude>"] = args[i++]                                          //exclud
 props["build.logUrl"] = args[i++]                                       //build.logUrl
 props["<ec2.region>"] = args[i++]                                       //ec2_region
 props["<supported.clouds>"] = args[i++]                                 //sgtest_clouds*/
-props["<suite.number>"] = "2"//args[i++]                                     //suite_number
-props["<suite.name>"] = "CLOUDS"//args[i++]                                       //suite_name
+
+
+
+props["<buildNumber>"] = args[i++]                                      //build.number
+props["<version>"] = args[i++]                                          //cloudify_product_version
+props["<milestone>"] = args[i++]                                        //milestone
+props["<milestoneUpperCase>"] = "SNAPSHOT"//props["<milestone>"].toUpperCase()      //milestone upper case
+props["<suite.number>"] = args[i++]                                     //suite_number
+props["<suite.name>"] = args[i++]                                       //suite_name
 props["testRunId"] = "${props["<suite.name>"]}-${System.currentTimeMillis()}"
 
 logger.info "strating itests suite with id: ${props["testRunId"]}"
