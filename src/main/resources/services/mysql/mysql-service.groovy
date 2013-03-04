@@ -34,12 +34,13 @@ service {
 		global {
 			useManagement true
 		}
-	storage{
+	}
+	storage {
 		template "SMALL_BLOCK"
 	}
 
 	
-	lifecycle{
+	lifecycle {
  
 		install "mysql_install.groovy"
 
