@@ -27,6 +27,7 @@ import java.util.logging.Logger
 //variable definitions
 Logger logger = Logger.getLogger(this.getClass().getName())
 scriptDir = new File(getClass().protectionDomain.codeSource.location.path).parent
+commandOptions="--verbose -timeout 15"
 deployerPropertiesFile = new File("deployer.properties")
 config= new ConfigSlurper().parse(deployerPropertiesFile.toURL())
 def props = [:] as Map<String, String>
@@ -64,7 +65,7 @@ def cloudify(arguments, capture, shouldConnect){
     }
     ant.sequential{
         if(shouldConnect){
-            arguments = "connent ${config.MGT_MACHINE};" + arguments
+            arguments = "connect ${config.MGT_MACHINE};" + arguments
         }
         exec(executable: "./cloudify.sh",
                 failonerror:true,
@@ -95,10 +96,10 @@ props["sgtest_jvm_settings"] = args[i++]                                //sgtest
 props["branch_name"] = args[i++]                                        //branch_name
 props["<include>"] = args[i++]                                          //include_list
 props["<exclude>"] = args[i++]                                          //exclude_list
-props["<suite.number>"] = args[i++]                                     //suite_number
 props["build.logUrl"] = args[i++]                                       //build.logUrl
 props["<ec2.region>"] = args[i++]                                       //ec2_region
 props["<supported.clouds>"] = args[i++]                                 //sgtest_clouds*/
+props["<suite.number>"] = "2"//args[i++]                                     //suite_number
 props["<suite.name>"] = "CLOUDS"//args[i++]                                       //suite_name
 props["testRunId"] = "${props["<suite.name>"]}-${System.currentTimeMillis()}"
 
@@ -107,11 +108,11 @@ logger.info "strating itests suite with id: ${props["testRunId"]}"
 logger.info "checking if management machine is up"
 if (shouldBootstrap()){
     logger.info "management is down and should be bootstrapped"
-    config.MGT_MACHINE = cloudify("bootstrap --verbose ec2", true, false).find("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}")
+    config.MGT_MACHINE = cloudify("bootstrap ${commandOptions} ec2", true, false).find("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}")
     deployerPropertiesFile.withWriter {
         writer -> config.writeTo(writer)
     }
-    cloudify "install-service ${scriptDir}/../resources/services/mysql", false, true
+    cloudify "install-service ${commandOptions} ${scriptDir}/../resources/services/mysql", false, true
 }
 logger.info "management is up"
 
@@ -131,7 +132,7 @@ def serviceFilePath = "${props["testRunId"]}/cloudify-itests-service.groovy"
 replaceTextInFile serviceFilePath, ["<name>" : props["testRunId"], "<numInstances>" : props["<suite.number>"]]
 
 logger.info "install service"
-cloudify "install-service --verbose ${scriptDir}/${props["testRunId"]}"
+cloudify "install-service ${commandOptions} ${scriptDir}/${props["testRunId"]}"
 
 logger.info "poll for suite completion"
 int count
@@ -141,7 +142,7 @@ while((count = cloudify("list-attributes", true, true).count(props["testRunId"])
 }
 
 logger.info "uninstall service"
-cloudify "uninstall-service --verbose ${props["testRunId"]}"
+cloudify "uninstall-service ${commandOptions} ${props["testRunId"]}"
 
 logger.info "TODO merge reports and send mail..."
 testConfig = new ConfigSlurper().parse(new File(servicePropsPath).toURL())
