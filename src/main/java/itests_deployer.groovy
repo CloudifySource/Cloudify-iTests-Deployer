@@ -87,20 +87,15 @@ logger.info "strating itests suite with id: ${props["testRunId"]}"
 props["<buildNumber>"] = args[i++]                                      //build.number
 props["<version>"] = args[i++]                                          //cloudify_product_version
 props["<milestone>"] = args[i++]                                        //milestone
-props["<milestoneUpperCase>"] = props["<milestone>"].toUpperCase()  //milestone upper case
-props["cloudify_package_name"] = args[i++]                              //cloudify_package_name
+props["<milestoneUpperCase>"] = props["<milestone>"].toUpperCase()      //milestone upper case
+props["package_name"] = args[i++]                                       //cloudify_package_name
 props["xap_jdk"] = args[i++]                                            //xap_jdk
 props["sgtest_jdk"] = args[i++]                                         //sgtest_jdk
 props["sgtest_jvm_settings"] = args[i++]                                //sgtest_jvm_settings
-props["sgtest_module"] = args[i++]                                      //sgtest_module
-props["sgtest_gsa_wan_machines"] = args[i++]                            //sgtest_gsa_wan_machines
-props["sgtest_type"] = args[i++]                                        //sgtest_type
-props["sgtest_client_mode"] = args[i++]                                 //sgtest_client_mode
 props["branch_name"] = args[i++]                                        //branch_name
 props["<include>"] = args[i++]                                          //include_list
 props["<exclude>"] = args[i++]                                          //exclude_list
 props["<suite.name>"] = args[i++]                                       //suite_name
-props["svn_tags_and_branches_directory"] = args[i++]                    //svn_tags_and_branches_directory
 props["<suite.number>"] = args[i++]                                     //suite_number
 props["build.logUrl"] = args[i++]                                       //build.logUrl
 props["<ec2.region>"] = args[i++]                                       //ec2_region
@@ -135,8 +130,10 @@ logger.info "install service"
 cloudify "install-service --verbose ${System.getProperty("user.dir")}/${props["testRunId"]}"
 
 logger.info "poll for suite completion"
-while(cloudify("list-attributes", true, true).count(props["testRunId"]) > 0){
-    sleep(TimeUnit.SECONDS.toMillis(10))
+int count
+while((count = cloudify("list-attributes", true, true).count(props["testRunId"])) > 0){
+    logger.info "test run ${props["suite_name"]} has still ${count} suites running"
+    sleep(TimeUnit.MINUTES.toMillis(1))
 }
 
 logger.info "uninstall service"
@@ -144,20 +141,5 @@ cloudify "uninstall-service --verbose ${props["testRunId"]}"
 
 logger.info "merge reports"
 testConfig = new ConfigSlurper().parse(new File(servicePropsPath).toURL())
-
-//TODO -Dcloudify.home=${buildDir}
-/*TestsReportMerger.main("${testConfig.test.SUITE_TYPE}",
-        "${testConfig.test.BUILD_NUMBER}",
-        "${testConfig.test.SUITE_NAME}",
-        "${testConfig.test.MAJOR_VERSION}",
-        "${testConfig.test.MINOR_VERSION}")
-
-//send mail
-WikiReporter.main("${testConfig.test.SUITE_TYPE}",
-        "${testConfig.test.BUILD_NUMBER}",
-        "${testConfig.test.SUITE_NAME}",
-        "${testConfig.test.MAJOR_VERSION}",
-        "${testConfig.test.MINOR_VERSION}",
-        "${testConfig.test.BUILD_LOG_URL}")*/
 
 System.exit 0
