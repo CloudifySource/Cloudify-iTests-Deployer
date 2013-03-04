@@ -27,7 +27,7 @@ import java.util.logging.Logger
 //variable definitions
 Logger logger = Logger.getLogger(this.getClass().getName())
 config= new ConfigSlurper().parse(new File("deployer.properties").toURL())
-def arguments = [:] as HashMap<String, String>
+def props = [:] as Map<String, String>
 def i = 0
 
 
@@ -40,18 +40,18 @@ def cp(from, to){
     }
 }
 
-def replaceTextInFile(filePath, props){
+def replaceTextInFile(String filePath, Map<String, String> properties){
     def file = new File(filePath) as File
     def propsText = file.text
-    for (it in props.keySet()) {
-        propsText = propsText.replace(it, props[it])
+    for (it in properties.keySet()) {
+        propsText = propsText.replace(it, properties[it])
     }
     file.write(propsText)
 }
 
 
 
-def cloudify(arguments, capture, shouldConnect){
+def cloudify(String arguments, capture, shouldConnect){
     def output = new ByteArrayOutputStream()
     ant = new AntBuilder()
     if (capture){
@@ -73,7 +73,7 @@ def cloudify(arguments, capture, shouldConnect){
     return output.toString()
 }
 
-def cloudify(arguments){
+def cloudify(String arguments){
     cloudify(arguments, false, true)
 }
 
@@ -82,31 +82,31 @@ def shouldBootstrap(){
     return connectionStatus.contains("Connected successfully")
 }
 
-logger.info "strating itests suite with id: ${arguments["testRunId"]}"
+logger.info "strating itests suite with id: ${props["testRunId"]}"
 
-arguments["<buildNumber>"] = args[i++]                                      //build.number
-arguments["<version>"] = args[i++]                                          //cloudify_product_version
-arguments["<milestone>"] = args[i++]                                        //milestone
-arguments["<milestoneUpperCase>"] = arguments["<milestone>"].toUpperCase()  //milestone upper case
-arguments["cloudify_package_name"] = args[i++]                              //cloudify_package_name
-arguments["xap_jdk"] = args[i++]                                            //xap_jdk
-arguments["sgtest_jdk"] = args[i++]                                         //sgtest_jdk
-arguments["sgtest_jvm_settings"] = args[i++]                                //sgtest_jvm_settings
-arguments["sgtest_module"] = args[i++]                                      //sgtest_module
-arguments["sgtest_gsa_wan_machines"] = args[i++]                            //sgtest_gsa_wan_machines
-arguments["sgtest_type"] = args[i++]                                        //sgtest_type
-arguments["sgtest_client_mode"] = args[i++]                                 //sgtest_client_mode
-arguments["branch_name"] = args[i++]                                        //branch_name
-arguments["<include>"] = args[i++]                                          //include_list
-arguments["<exclude>"] = args[i++]                                          //exclude_list
-arguments["<suite.name>"] = args[i++]                                       //suite_name
-arguments["svn_tags_and_branches_directory"] = args[i++]                    //svn_tags_and_branches_directory
-arguments["<suite.number>"] = args[i++]                                     //suite_number
-arguments["build.logUrl"] = args[i++]                                       //build.logUrl
-arguments["<ec2.region>"] = args[i++]                                       //ec2_region
-arguments["<supported.clouds>"] = args[i++]                                 //sgtest_clouds
-arguments["testRunId"] = "${arguments["suite_name"]}-${System.currentTimeMillis()}"
-arguments["<credentials.folder>"] =
+props["<buildNumber>"] = args[i++]                                      //build.number
+props["<version>"] = args[i++]                                          //cloudify_product_version
+props["<milestone>"] = args[i++]                                        //milestone
+props["<milestoneUpperCase>"] = props["<milestone>"].toUpperCase()  //milestone upper case
+props["cloudify_package_name"] = args[i++]                              //cloudify_package_name
+props["xap_jdk"] = args[i++]                                            //xap_jdk
+props["sgtest_jdk"] = args[i++]                                         //sgtest_jdk
+props["sgtest_jvm_settings"] = args[i++]                                //sgtest_jvm_settings
+props["sgtest_module"] = args[i++]                                      //sgtest_module
+props["sgtest_gsa_wan_machines"] = args[i++]                            //sgtest_gsa_wan_machines
+props["sgtest_type"] = args[i++]                                        //sgtest_type
+props["sgtest_client_mode"] = args[i++]                                 //sgtest_client_mode
+props["branch_name"] = args[i++]                                        //branch_name
+props["<include>"] = args[i++]                                          //include_list
+props["<exclude>"] = args[i++]                                          //exclude_list
+props["<suite.name>"] = args[i++]                                       //suite_name
+props["svn_tags_and_branches_directory"] = args[i++]                    //svn_tags_and_branches_directory
+props["<suite.number>"] = args[i++]                                     //suite_number
+props["build.logUrl"] = args[i++]                                       //build.logUrl
+props["<ec2.region>"] = args[i++]                                       //ec2_region
+props["<supported.clouds>"] = args[i++]                                 //sgtest_clouds
+props["testRunId"] = "${props["suite_name"]}-${System.currentTimeMillis()}"
+props["<credentials.folder>"] =
 
 logger.info "checking if management machine is up"
 if (shouldBootstrap()){
@@ -119,28 +119,28 @@ logger.info "management is up"
 
 
 logger.info "copy service dir"
-cp "../resources/services/cloudify-itests-service", arguments["testRunId"]
+cp "../resources/services/cloudify-itests-service", props["testRunId"]
 
-cp "${config.CREDENTIAL_DIR}", "${arguments["testRunId"]}/credentials"
+cp "${config.CREDENTIAL_DIR}", "${props["testRunId"]}/credentials"
 
 
 logger.info "configure test suite"
-def servicePropsPath = "${arguments["testRunId"]}/cloudify-itests.properties"
-replaceTextInFile servicePropsPath, arguments
+def servicePropsPath = "${props["testRunId"]}/cloudify-itests.properties"
+replaceTextInFile servicePropsPath, props
 
-def serviceFilePath = "${arguments["testRunId"]}/cloudify-itests-service.groovy"
-replaceTextInFile serviceFilePath, ["<name>" : arguments["testRunId"], "<numInstances>" : arguments["<suite.number>"]]
+def serviceFilePath = "${props["testRunId"]}/cloudify-itests-service.groovy"
+replaceTextInFile serviceFilePath, ["<name>" : props["testRunId"], "<numInstances>" : props["<suite.number>"]]
 
 logger.info "install service"
-cloudify "install-service --verbose ${System.getProperty("user.dir")}/${arguments["testRunId"]}"
+cloudify "install-service --verbose ${System.getProperty("user.dir")}/${props["testRunId"]}"
 
 logger.info "poll for suite completion"
-while(cloudify("list-attributes", true, true).count(arguments["testRunId"]) > 0){
+while(cloudify("list-attributes", true, true).count(props["testRunId"]) > 0){
     sleep(TimeUnit.SECONDS.toMillis(10))
 }
 
 logger.info "uninstall service"
-cloudify "uninstall-service --verbose ${arguments["testRunId"]}"
+cloudify "uninstall-service --verbose ${props["testRunId"]}"
 
 logger.info "merge reports"
 testConfig = new ConfigSlurper().parse(new File(servicePropsPath).toURL())
