@@ -1,14 +1,13 @@
 @Grab(group = "org.eclipse.jgit", module = "org.eclipse.jgit", version = "2.2.0.201212191850-r")
 
-import com.gigaspaces.document.SpaceDocument
-
 import org.cloudifysource.dsl.context.ServiceContextFactory
 import org.cloudifysource.dsl.utils.ServiceUtils
-
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder
 
-import java.util.concurrent.Executors;
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
+
 /**
  * User: Sagi Bernstein
  * Date: 10/02/13
@@ -73,11 +72,10 @@ results = pool.invokeAll([
         }
     }])
 try{
-    results.each { it.get() }
-} finally{
+    results.each { it.get(15, TimeUnit.MINUTES) }
+} finally {
     pool.shutdownNow()
 }
 
-def indicator = new SpaceDocument()
-indicator.addProperties(["key" : config.test.TEST_RUN_ID])
-context.attributes.thisService["testRunId"] = indicator
+
+context.attributes.thisService["${config.test.TEST_RUN_ID}-${context.getInstanceId()}"] = new Date().format 'dd/MM/yyyy-hh:mm:ss'

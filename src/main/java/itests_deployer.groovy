@@ -1,5 +1,10 @@
 package deployer
-@Grapes([
+
+import org.apache.tools.ant.DefaultLogger
+
+import java.util.concurrent.TimeUnit
+
+/*@Grapes([
     @GrabResolver(name = 'openspaces', root = 'http://maven-repository.openspaces.org'),
     @Grab(group = "com.gigaspaces", module = "gs-openspaces", version = "9.5.0-SNAPSHOT"),
     @Grab(group = "com.gigaspaces.quality", module = "DashboardReporter", version = "0.0.2-SNAPSHOT"),
@@ -8,14 +13,10 @@ package deployer
     @Grab(group = "org.swift.common", module = "confluence-soap", version = "0.5"),
     @Grab(group = "javax.xml", module = "jaxrpc-api", version = "1.1"),
 ])
-
-
 import deployer.report.TestsReportMerger
-import deployer.report.wiki.WikiReporter
-import org.apache.tools.ant.DefaultLogger
+import deployer.report.wiki.WikiReporter*/
 
 import java.util.logging.Logger
-
 
 /**
  * User: Sagi Bernstein
@@ -50,7 +51,7 @@ def replaceTextInFile(filePath, props){
 
 
 
-def cloudify(arguments, capture){
+def cloudify(arguments, capture, shouldConnect){
     def output = new ByteArrayOutputStream()
     ant = new AntBuilder()
     if (capture){
@@ -60,7 +61,9 @@ def cloudify(arguments, capture){
         }
     }
     ant.sequential{
-        //arguments = "connent ${config.MGT_MACHINE};" + arguments
+        if(shouldConnect){
+            arguments = "connent ${config.MGT_MACHINE};" + arguments
+        }
         exec(executable: "./cloudify.sh",
                 failonerror:true,
                 dir:"${config.CLOUDIFY_HOME}/bin") {
@@ -71,11 +74,15 @@ def cloudify(arguments, capture){
 }
 
 def cloudify(arguments){
-    cloudify(arguments, false)
+    cloudify(arguments, false, true)
 }
 
+def shouldBootstrap(){
+    def connectionStatus = cloudify("", true, true)
+    return connectionStatus.contains("Connected successfully")
+}
 
-
+logger.info "strating itests suite with id: ${arguments["testRunId"]}"
 
 arguments["<buildNumber>"] = args[i++]                                      //build.number
 arguments["<version>"] = args[i++]                                          //cloudify_product_version
@@ -98,10 +105,17 @@ arguments["<suite.number>"] = args[i++]                                     //su
 arguments["build.logUrl"] = args[i++]                                       //build.logUrl
 arguments["<ec2.region>"] = args[i++]                                       //ec2_region
 arguments["<supported.clouds>"] = args[i++]                                 //sgtest_clouds
-
 arguments["testRunId"] = "${arguments["suite_name"]}-${System.currentTimeMillis()}"
+arguments["<credentials.folder>"] =
 
-logger.info "strating itests suite with id: ${arguments["testRunId"]}"
+logger.info "checking if management machine is up"
+if (shouldBootstrap()){
+    logger.info "management is down and should be bootstrapped"
+    cloudify "bootstrap --verbose ec2", false, false
+    cloudify "install-service ${config.MYSQL.serviceDir}", false, true
+}
+logger.info "management is up"
+
 
 
 logger.info "copy service dir"
@@ -114,15 +128,15 @@ logger.info "configure test suite"
 def servicePropsPath = "${arguments["testRunId"]}/cloudify-itests.properties"
 replaceTextInFile servicePropsPath, arguments
 
+def serviceFilePath = "${arguments["testRunId"]}/cloudify-itests-service.groovy"
+replaceTextInFile serviceFilePath, ["<name>" : arguments["testRunId"], "<numInstances>" : arguments["<suite.number>"]]
 
 logger.info "install service"
 cloudify "install-service --verbose ${System.getProperty("user.dir")}/${arguments["testRunId"]}"
 
 logger.info "poll for suite completion"
-
-
-while(cloudify("list-attributes", true).count("${arguments["testRunId"]}") > 0){
-    sleep(10 * 1000)
+while(cloudify("list-attributes", true, true).count(arguments["testRunId"]) > 0){
+    sleep(TimeUnit.SECONDS.toMillis(10))
 }
 
 logger.info "uninstall service"
@@ -132,7 +146,7 @@ logger.info "merge reports"
 testConfig = new ConfigSlurper().parse(new File(servicePropsPath).toURL())
 
 //TODO -Dcloudify.home=${buildDir}
-TestsReportMerger.main("${testConfig.test.SUITE_TYPE}",
+/*TestsReportMerger.main("${testConfig.test.SUITE_TYPE}",
         "${testConfig.test.BUILD_NUMBER}",
         "${testConfig.test.SUITE_NAME}",
         "${testConfig.test.MAJOR_VERSION}",
@@ -144,6 +158,6 @@ WikiReporter.main("${testConfig.test.SUITE_TYPE}",
         "${testConfig.test.SUITE_NAME}",
         "${testConfig.test.MAJOR_VERSION}",
         "${testConfig.test.MINOR_VERSION}",
-        "${testConfig.test.BUILD_LOG_URL}")
+        "${testConfig.test.BUILD_LOG_URL}")*/
 
 System.exit 0

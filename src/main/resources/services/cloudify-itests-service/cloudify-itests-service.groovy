@@ -6,10 +6,10 @@
  */
 
 service {
-    name "cloudify-itests"
+    name "<name>"
     icon "tgrid.jpg"
     type "WEB_SERVER"
-    numInstances 1
+    numInstances "<numInstances>"
 
     lifecycle{
         init "cloudify_itests_install.groovy"

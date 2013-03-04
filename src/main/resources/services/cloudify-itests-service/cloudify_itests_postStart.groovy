@@ -7,7 +7,7 @@ import org.cloudifysource.dsl.utils.ServiceUtils
  * Time: 12:06
  */
 
-serviceDir = System.getProperty("user.home") + "/cloudify-itests-service"
+serviceDir = "${System.getProperty("user.home")}/cloudify-itests-service"
 config = new ConfigSlurper().parse(new File("cloudify-itests.properties").toURL())
 context = ServiceContextFactory.getServiceContext()
 
@@ -44,7 +44,8 @@ def arguments = "test -e -X -U -P tgrid-sgtest-cloudify " +
         "-Dcom.gs.deploy=${config.test.SUITE_DEPLOY_DIR} " +
         "-Dec2.region=${config.test.EC2_REGION} " +
         "-DipList=${config.test.BYON_MACHINES} " +
-        "-Dsupported-clouds=${config.test.SUPPORTED_CLOUDS}"
+        "-Dsupported-clouds=${config.test.SUPPORTED_CLOUDS} " +
+        "-Dcom.quality.sgtest.credentialsFolder=${context.getServiceDirectory()}/credentials"
 
 try{
     new AntBuilder().sequential{
@@ -59,13 +60,6 @@ try{
         }
     }
 }finally{
-    context.attributes.thisService.remove("testRunId")
+    context.attributes.thisService.remove "${config.test.TEST_RUN_ID}-${context.instanceId}"
 }
-
-executeMaven(mvnExec,
-        "exec:java -Dexec.mainClass=\"framework.testng.report.TestsReportMerger\" -Dexec.args=\"${config.test.SUITE_TYPE} ${config.test.BUILD_NUMBER} ${config.test.SUITE_NAME} ${config.test.MAJOR_VERSION} ${config.test.MINOR_VERSION}\" -Dcloudify.home=${buildDir}",
-        "${serviceDir}/${config.scm.projectName}")
-executeMaven(mvnExec,
-        "exec:java -Dexec.mainClass=\"framework.testng.report.wiki.WikiReporter\" -Dexec.args=\"${config.test.SUITE_TYPE} ${config.test.BUILD_NUMBER} ${config.test.SUITE_NAME} ${config.test.MAJOR_VERSION} ${config.test.MINOR_VERSION} ${config.test.BUILD_LOG_URL}\" -Dcloudify.home=${buildDir}",
-        "${serviceDir}/${config.scm.projectName}")
 
