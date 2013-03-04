@@ -59,8 +59,9 @@ def cloudify(arguments, capture, shouldConnect){
     ant = new AntBuilder()
     if (capture){
         ant.project.getBuildListeners().each {
-            if(it instanceof DefaultLogger)
+            if(it instanceof DefaultLogger){
                 it.setOutputPrintStream(new PrintStream(output))
+	    }
         }
     }
     ant.sequential{
@@ -73,7 +74,7 @@ def cloudify(arguments, capture, shouldConnect){
             arg(value: arguments)
         }
     }
-    return output.toString()
+    return output.toString() + error.toString()
 }
 
 def cloudify(arguments){
@@ -81,7 +82,7 @@ def cloudify(arguments){
 }
 
 def shouldBootstrap(){
-    def connectionStatus = cloudify("connect -timeout 1 ${config.MGT_MACHINE}", true, false)
+    def connectionStatus = cloudify("", true, true)
     return !connectionStatus.contains("Connected successfully")
 }
 
@@ -141,9 +142,9 @@ cloudify "install-service ${commandOptions} ${scriptDir}/${props["testRunId"]}"
 
 logger.info "poll for suite completion"
 int count
-while((count = cloudify("list-attributes -scope service:${props["testRunId"]}", true, true).count(props["testRunId"])) > 0){
-    logger.info "test run ${props["suite_name"]} has still ${count} suites running"
-    sleep(TimeUnit.MINUTES.toMillis(1))
+while((count = cloudify("list-attributes -scope service:${props["testRunId"]}", true, true).find("\\{.*\\}").count(props["testRunId"])) > 0){
+    logger.info "test run ${props["testRunId"]} has still ${count} suites running"
+    sleep TimeUnit.MINUTES.toMillis(1)
 }
 
 logger.info "uninstall service"
