@@ -72,10 +72,10 @@ results = pool.invokeAll([
         }
     }])
 try{
+
     results.each { it.get(15, TimeUnit.MINUTES) }
+    context.attributes.thisService["${config.test.TEST_RUN_ID}-${context.getInstanceId()}"] = new Date().format 'dd/MM/yyyy-hh:mm:ss'
+
 } finally {
     pool.shutdownNow()
 }
-
-
-context.attributes.thisService["${config.test.TEST_RUN_ID}-${context.getInstanceId()}"] = new Date().format 'dd/MM/yyyy-hh:mm:ss'
