@@ -81,12 +81,10 @@ def cloudify(arguments){
 
 def shouldBootstrap(){
     def connectionStatus = cloudify("", true, true)
-    return connectionStatus.contains("Connected successfully")
+    return !connectionStatus.contains("Connected successfully")
 }
 
-logger.info "strating itests suite with id: ${props["testRunId"]}"
-
-props["<buildNumber>"] = args[i++]                                      //build.number
+/*props["<buildNumber>"] = args[i++]                                      //build.number
 props["<version>"] = args[i++]                                          //cloudify_product_version
 props["<milestone>"] = args[i++]                                        //milestone
 props["<milestoneUpperCase>"] = props["<milestone>"].toUpperCase()      //milestone upper case
@@ -97,13 +95,14 @@ props["sgtest_jvm_settings"] = args[i++]                                //sgtest
 props["branch_name"] = args[i++]                                        //branch_name
 props["<include>"] = args[i++]                                          //include_list
 props["<exclude>"] = args[i++]                                          //exclude_list
-props["<suite.name>"] = args[i++]                                       //suite_name
 props["<suite.number>"] = args[i++]                                     //suite_number
 props["build.logUrl"] = args[i++]                                       //build.logUrl
 props["<ec2.region>"] = args[i++]                                       //ec2_region
-props["<supported.clouds>"] = args[i++]                                 //sgtest_clouds
-props["testRunId"] = "${props["suite_name"]}-${System.currentTimeMillis()}"
+props["<supported.clouds>"] = args[i++]                                 //sgtest_clouds*/
+props["<suite.name>"] = "CLOUDS"//args[i++]                                       //suite_name
+props["testRunId"] = "${props["<suite.name>"]}-${System.currentTimeMillis()}"
 
+logger.info "strating itests suite with id: ${props["testRunId"]}"
 
 logger.info "checking if management machine is up"
 if (shouldBootstrap()){
@@ -144,5 +143,8 @@ cloudify "uninstall-service --verbose ${props["testRunId"]}"
 
 logger.info "TODO merge reports and send mail..."
 testConfig = new ConfigSlurper().parse(new File(servicePropsPath).toURL())
+
+logger.info "removing ${props["testRunId"]} service dir"
+new File(props["testRunId"]).deleteDir()
 
 System.exit 0
