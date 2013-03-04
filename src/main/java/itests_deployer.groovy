@@ -136,7 +136,7 @@ cloudify "install-service ${commandOptions} ${scriptDir}/${props["testRunId"]}"
 
 logger.info "poll for suite completion"
 int count
-while((count = cloudify("list-attributes", true, true).count(props["testRunId"])) > 0){
+while((count = cloudify("list-attributes -scope service:${props["testRunId"]}", true, true).count(props["testRunId"])) > 0){
     logger.info "test run ${props["suite_name"]} has still ${count} suites running"
     sleep(TimeUnit.MINUTES.toMillis(1))
 }
