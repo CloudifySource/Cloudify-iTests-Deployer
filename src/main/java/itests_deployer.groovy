@@ -97,7 +97,7 @@ logger.info "strating itests suite with id: ${props["testRunId"]}"
 logger.info "checking if management machine is up"
 if (shouldBootstrap()){
     logger.info "management is down and should be bootstrapped"
-    config.MGT_MACHINE = cloudify("bootstrap ${commandOptions} ec2", true, false).find("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}")
+    config.MGT_MACHINE = cloudify("bootstrap-cloud ${commandOptions} ec2", true, false).find("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}")
     deployerPropertiesFile.withWriter {
         writer -> config.writeTo(writer)
     }
