@@ -52,8 +52,8 @@ results = pool.invokeAll([
                     clone = git.cloneRepository()
                     clone.setDirectory(gitDir)
                             .setURI("${config.git.checkoutUrl}")
-                    if (!"dummy".equals(config.scm.branchName))
-                        clone.setBranch()
+                    if (!"dummy".equals("${config.scm.branchName}"))
+                        clone.setBranch("${config.scm.branchName}")
                     clone.call()
                 break
 
