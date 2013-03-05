@@ -1,21 +1,7 @@
 package deployer
 
 import org.apache.tools.ant.DefaultLogger
-
 import java.util.concurrent.TimeUnit
-
-/*@Grapes([
-    @GrabResolver(name = 'openspaces', root = 'http://maven-repository.openspaces.org'),
-    @Grab(group = "com.gigaspaces", module = "gs-openspaces", version = "9.5.0-SNAPSHOT"),
-    @Grab(group = "com.gigaspaces.quality", module = "DashboardReporter", version = "0.0.2-SNAPSHOT"),
-    @Grab(group = "org.jclouds.provider", module = "aws-s3", version = "1.5.3"),
-    @Grab(group = "javax.mail", module = "mail", version = "1.4.5"),
-    @Grab(group = "org.swift.common", module = "confluence-soap", version = "0.5"),
-    @Grab(group = "javax.xml", module = "jaxrpc-api", version = "1.1"),
-])
-import deployer.report.TestsReportMerger
-import deployer.report.wiki.WikiReporter*/
-
 import java.util.logging.Logger
 
 /**
@@ -63,7 +49,7 @@ def cloudify(arguments, capture, shouldConnect){
                 it.setOutputPrintStream(new PrintStream(output))
 	    }
         }
-    }
+2    }
     ant.sequential{
         if(shouldConnect){
             arguments = "connect ${config.MGT_MACHINE};" + arguments
@@ -74,7 +60,7 @@ def cloudify(arguments, capture, shouldConnect){
             arg(value: arguments)
         }
     }
-    return output.toString() + error.toString()
+    return output.toString()
 }
 
 def cloudify(arguments){
@@ -82,14 +68,11 @@ def cloudify(arguments){
 }
 
 def shouldBootstrap(){
-    def connectionStatus = cloudify("", true, true)
-    return !connectionStatus.contains("Connected successfully")
+    return """${config.CLOUDIFY_HOME}/bin/cloudify.sh connect ${config.MGT_MACHINE}""".execute().waitFor() != 0
 }
 
 
 
-
-props["<milestoneUpperCase>"] = "SNAPSHOT" //props["<milestone>"].toUpperCase()
 props["<buildNumber>"] = args[i++]         //0
 props["<version>"] = args[i++]             //1
 props["<milestone>"] = args[i++]           //2
@@ -99,11 +82,13 @@ props["<include>"] = args[i++]             //5
 props["<exclude>"] = args[i++]             //6
 props["<ec2.region>"] = args[i++]          //7
 props["<supported.clouds>"] = args[i++]    //8
-props["<package.name>"] = args[i++]        //9
-props["<xap.jdk>"] = args[i++]             //10
-props["<sgtest.jdk>"] = args[i++]          //11
-props["<sgtest.jvm_settings>"] = args[i++] //12
-props["<branch.name>"] = args[i]           //13
+props["<byon.machines>"] = args[i++]       //9
+props["<branch.name>"] = args[i++]         //10
+props["<package.name>"] = args[i++]        //11
+props["<xap.jdk>"] = args[i++]             //12
+props["<sgtest.jdk>"] = args[i++]          //13
+props["<sgtest.jvm.settings>"] = args[i]   //14
+props["<milestoneUpperCase>"] = "SNAPSHOT" //props["<milestone>"].toUpperCase()
 props["testRunId"] = "${props["<suite.name>"]}-${System.currentTimeMillis()}"
 
 
