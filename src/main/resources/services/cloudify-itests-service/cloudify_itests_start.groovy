@@ -1,3 +1,6 @@
+@Grapes(
+        @Grab(group='org.jclouds.api', module='s3', version='1.5.8')
+)
 import org.cloudifysource.dsl.context.ServiceContextFactory
 import org.cloudifysource.dsl.utils.ServiceUtils
 
@@ -57,31 +60,22 @@ def arguments = "test -e -X -U -P tgrid-sgtest-cloudify " +
         "-Dcom.quality.sgtest.credentialsFolder=${context.getServiceDirectory()}/credentials"
 
 try{
-    new AntBuilder().sequential{
-        chmod(dir:mvnBinDir, perm:'+x', includes:"**/*")
-        exec(executable: mvnExec,
-                failonerror:false,
-                dir:"${serviceDir}/${config.scm.projectName}") {
-            env(key: "SUITE_WORK_DIR", value: "${config.test.SUITE_WORK_DIR}")
-            env(key: "SUITE_DEPLOY_DIR", value: "${config.test.SUITE_DEPLOY_DIR}")
-            env(key: "EXT_JAVA_OPTIONS", value: prefix + "-Dcom.gs.work=${config.test.SUITE_WORK_DIR} -Dcom.gs.deploy=${config.test.SUITE_DEPLOY_DIR}")
-            arguments.split(" ").each { arg(value: it) }
-        }
-    }
+    executeMaven mvnExec, arguments, "${serviceDir}/${config.scm.projectName}"
 }finally{
-
+    //TODO: upload to s3 bucket
     context.attributes.thisService.remove "${config.test.TEST_RUN_ID}-${context.instanceId}"
 }
 if (context.instanceId == 1){
     while(context.attributes.thisService.grep(~/^\${config.test.TEST_RUN_ID}.*/).size() > 0){
         sleep TimeUnit.MINUTES.toMillis(1)
     }
-        executeMaven(mvnExec,
-                "exec:java -Dexec.mainClass=\"framework.testng.report.TestsReportMerger\" -Dexec.args=\"${config.test.SUITE_TYPE} ${config.test.BUILD_NUMBER} ${config.test.SUITE_NAME} ${config.test.MAJOR_VERSION} ${config.test.MINOR_VERSION}\" -Dcloudify.home=${buildDir}",
-                "${serviceDir}/${config.scm.projectName}")
-        executeMaven(mvnExec,
-                "exec:java -Dexec.mainClass=\"framework.testng.report.wiki.WikiReporter\" -Dexec.args=\"${config.test.SUITE_TYPE} ${config.test.BUILD_NUMBER} ${config.test.SUITE_NAME} ${config.test.MAJOR_VERSION} ${config.test.MINOR_VERSION} ${config.test.BUILD_LOG_URL}\" -Dcloudify.home=${buildDir}",
-                "${serviceDir}/${config.scm.projectName}")
+    //TODO: download from s3 bucket
+    executeMaven(mvnExec,
+            "exec:java -Dexec.mainClass=\"framework.testng.report.TestsReportMerger\" -Dexec.args=\"${config.test.SUITE_TYPE} ${config.test.BUILD_NUMBER} ${config.test.SUITE_NAME} ${config.test.MAJOR_VERSION} ${config.test.MINOR_VERSION}\" -Dcloudify.home=${buildDir}",
+            "${serviceDir}/${config.scm.projectName}")
+    executeMaven(mvnExec,
+            "exec:java -Dexec.mainClass=\"framework.testng.report.wiki.WikiReporter\" -Dexec.args=\"${config.test.SUITE_TYPE} ${config.test.BUILD_NUMBER} ${config.test.SUITE_NAME} ${config.test.MAJOR_VERSION} ${config.test.MINOR_VERSION} ${config.test.BUILD_LOG_URL}\" -Dcloudify.home=${buildDir}",
+            "${serviceDir}/${config.scm.projectName}")
 }
 
 

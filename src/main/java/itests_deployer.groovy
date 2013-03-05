@@ -114,6 +114,7 @@ cp "${config.CREDENTIAL_DIR}", "${props["testRunId"]}/credentials"
 
 
 logger.info "configure test suite"
+props["<mgt.machine>"] = "${config.MGET_MACHINE}"
 def servicePropsPath = "${props["testRunId"]}/cloudify-itests.properties"
 replaceTextInFile servicePropsPath, props
 
