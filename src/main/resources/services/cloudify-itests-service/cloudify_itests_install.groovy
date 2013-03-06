@@ -16,8 +16,8 @@ import java.util.concurrent.TimeUnit
 
 
 
-config = new ConfigSlurper().parse(new File("cloudify-itests.properties").toURL())
-serviceDir = System.getProperty("user.home") + "/cloudify-itests-service"
+config = new ConfigSlurper().parse(new File("cloudify-itests.properties").text)
+serviceDir = "${System.getProperty("user.home")}/cloudify-itests-service"
 def context = ServiceContextFactory.getServiceContext()
 
 
@@ -29,19 +29,19 @@ def install(installDir, downloadPath, zipName) {
     new AntBuilder().sequential{
         mkdir(dir:installDir)
         get(src:downloadPath, dest:"${installDir}/${zipName}", skipexisting:true)
-        unzip(src:installDir + "/" + zipName, dest:installDir, overwrite:true)
+        unzip(src:"${installDir}/${zipName}", dest:installDir, overwrite:true)
     }
 }
 
 def pool = Executors.newCachedThreadPool()
 results = pool.invokeAll([
-    { install(serviceDir + "/" + config.cloudify.installDir, config.cloudify.downloadPath, config.cloudify.zipName) },
-    { install(serviceDir + "/" + config.maven.installDir, config.maven.downloadPath, config.maven.zipName) },
+    { install("${serviceDir}/${config.cloudify.installDir}", config.cloudify.downloadPath, config.cloudify.zipName) },
+    { install("${serviceDir}/${config.maven.installDir}", config.maven.downloadPath, config.maven.zipName) },
     {
         switch(config.scm.type){
         
             case "git":
-                    def gitDir = new File(serviceDir + "/" + config.scm.projectName)
+                    def gitDir = new File("${serviceDir}/${config.scm.projectName}")
                     FileRepositoryBuilder repBuilder = new FileRepositoryBuilder()
                     repository = repBuilder.setGitDir(gitDir)
                             .readEnvironment()
@@ -52,22 +52,22 @@ results = pool.invokeAll([
                     clone = git.cloneRepository()
                     clone.setDirectory(gitDir)
                             .setURI("${config.git.checkoutUrl}")
-                    if (!"dummy".equals("${config.scm.branchName}"))
+                    if ('dummy' != "${config.scm.branchName}")
                         clone.setBranch("${config.scm.branchName}")
                     clone.call()
                 break
 
             case "svn":
-                    install(serviceDir + "/" + config.svn.installDir, config.svn.downloadPath, config.svn.zipName)
-                    ext = ServiceUtils.isWindows() ? ".bat" : ""
+                    install("${serviceDir}/${config.svn.installDir}", config.svn.downloadPath, config.svn.zipName)
+                    ext = ServiceUtils.isWindows() ? '.bat' : ''
                     svnBinDir = "${serviceDir}/svn/svnkit-${config.svn.version}/bin"
                     new AntBuilder().sequential{
                         chmod(dir:svnBinDir, perm:'+x', includes:'**/*')
                         exec(executable:svnBinDir + "/jsvn" + ext,
                                 failonerror:true){
-                            arg(value:"co")
+                            arg(value:'co')
                             arg(value:"${config.svn.checkoutUrl}")
-                            arg(value:"--force")
+                            arg(value:'--force')
                             arg(value:"${serviceDir}/${config.scm.projectName}")
                         }
                     }
