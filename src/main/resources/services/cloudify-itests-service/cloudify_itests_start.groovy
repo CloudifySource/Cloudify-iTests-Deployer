@@ -3,6 +3,8 @@
 )
 import org.cloudifysource.dsl.context.ServiceContextFactory
 import org.cloudifysource.dsl.utils.ServiceUtils
+import org.jclouds.ContextBuilder
+import org.jclouds.blobstore.BlobStoreContext
 
 import java.util.concurrent.TimeUnit
 
@@ -28,11 +30,6 @@ context = ServiceContextFactory.getServiceContext()
 
 def buildDir = "${serviceDir}/${config.test.BUILD_DIR}"
 
-def prefix = System.getenv().get("EXT_JAVA_OPTIONS")
-if (prefix == null)
-    prefix = ""
-else
-    prefix += " "
 def ext = ServiceUtils.isWindows() ? ".bat" : "";
 def mvnBinDir = "${serviceDir}/maven/apache-maven-${config.maven.version}/bin"
 
@@ -62,29 +59,65 @@ def arguments = "test -e -X -U -P tgrid-sgtest-cloudify " +
 try{
     executeMaven mvnExec, arguments, "${serviceDir}/${config.scm.projectName}"
 }finally{
-    //TODO: upload to s3 bucket
-    context.attributes.thisService.remove "${config.test.TEST_RUN_ID}-${context.instanceId}"
-}
-if (context.instanceId == 1){
-    while(context.attributes.thisService.grep(~/^\${config.test.TEST_RUN_ID}.*/).size() > 0){
-        sleep TimeUnit.MINUTES.toMillis(1)
+
+    storageConfig = new ConfigSlurper().parse(new File("${context.getServiceDirectory()}/credentials/cloud/ec2/ec2-cred.properties").toURL())
+    provider = "s3"
+    blobStore  = ContextBuilder.newBuilder(provider)
+            .credentials("${storageConfig.user}", "${storageConfig.apiKey}")
+            .buildView(BlobStoreContext.class).getBlobStore()
+
+    containerName = "${config.test.TEST_RUN_ID}".toLowerCase()
+    //Instance 1 does merger so no need to upload
+    if (context.instanceId != 1){
+        // create container
+        blobStore.createContainerInLocation(null, containerName)
+        // add blob
+        def reportFilePath = "${serviceDir}/${config.test.SUITE_NAME}/sgtest-result-${config.test.SUITE_NAME}${context.instanceId}.xml"
+        blob = blobStore.blobBuilder(reportFilePath)
+                .payload(new File(reportFilePath)).build()
+        blobStore.putBlob(containerName, blob)
     }
-    //TODO: download from s3 bucket
-    executeMaven(mvnExec,
-            "exec:java -Dexec.mainClass=\"framework.testng.report.TestsReportMerger\" -Dexec.args=\"${config.test.SUITE_TYPE} ${config.test.BUILD_NUMBER} ${config.test.SUITE_NAME} ${config.test.MAJOR_VERSION} ${config.test.MINOR_VERSION}\" -Dcloudify.home=${buildDir}",
-            "${serviceDir}/${config.scm.projectName}")
-    executeMaven(mvnExec,
-            "exec:java -Dexec.mainClass=\"framework.testng.report.wiki.WikiReporter\" -Dexec.args=\"${config.test.SUITE_TYPE} ${config.test.BUILD_NUMBER} ${config.test.SUITE_NAME} ${config.test.MAJOR_VERSION} ${config.test.MINOR_VERSION} ${config.test.BUILD_LOG_URL}\" -Dcloudify.home=${buildDir}",
-            "${serviceDir}/${config.scm.projectName}")
-}
+    context.attributes.thisService.remove "${config.test.TEST_RUN_ID}-${context.instanceId}"
+
+    if (context.instanceId == 1){
+        while(context.attributes.thisService.grep(~/^\${config.test.TEST_RUN_ID}.*/).size() > 0){
+            sleep TimeUnit.MINUTES.toMillis(1)
+        }
+        //Download from s3 bucket
+        blobStore.list(containerName).eachParallel {
+            def input = blobStore.getBlob(containerName, it.getName()).getPayload().getInput()
+            def output = new FileOutputStream(new File("${serviceDir}/${config.test.SUITE_NAME}/${it.getName()}"))
+            read = 0
+            byte[] bytes = new byte[1024]
+
+            while ((read = input.read(bytes)) != -1) {
+                output.write(bytes, 0, read)
+            }
+
+            input.close()
+            output.flush()
+            output.close()
+        }
+
+        executeMaven(mvnExec,
+                "exec:java -Dexec.mainClass=\"framework.testng.report.TestsReportMerger\" -Dexec.args=\"${config.test.SUITE_TYPE} ${config.test.BUILD_NUMBER} ${serviceDir}/${config.test.SUITE_NAME} ${config.test.MAJOR_VERSION} ${config.test.MINOR_VERSION}\" -Dcloudify.home=${buildDir}",
+                "${serviceDir}/${config.scm.projectName}")
+        executeMaven(mvnExec,
+                "exec:java -Dexec.mainClass=\"framework.testng.report.wiki.WikiReporter\" -Dexec.args=\"${config.test.SUITE_TYPE} ${config.test.BUILD_NUMBER} ${serviceDir}/${config.test.SUITE_NAME} ${config.test.MAJOR_VERSION} ${config.test.MINOR_VERSION} ${config.test.BUILD_LOG_URL}\" -Dcloudify.home=${buildDir}",
+                "${serviceDir}/${config.scm.projectName}")
+
+        blobStore.clearContainer(containerName)
+        blobStore.deleteContainer(containerName)
+    }
 
 
 
 
-while(true){
-    try{
-        sleep TimeUnit.MINUTES.toMillis(5)
-    }catch(Exception e){
-        break
+    while(true){
+        try{
+            sleep TimeUnit.MINUTES.toMillis(5)
+        }catch(Exception e){
+            break
+        }
     }
 }
