@@ -79,8 +79,9 @@ try{
     }
     context.attributes.thisService.remove "${config.test.TEST_RUN_ID}-${context.instanceId}"
 
+    //Only instance 1 does report and mergers
     if (context.instanceId == 1){
-        while(context.attributes.thisService.grep(~/^\${config.test.TEST_RUN_ID}.*/).size() > 0){
+        while(context.attributes.thisService.grep("^\\${config.test.TEST_RUN_ID}.*").size() > 0){
             sleep TimeUnit.MINUTES.toMillis(1)
         }
         //Download from s3 bucket
@@ -100,10 +101,13 @@ try{
         }
 
         executeMaven(mvnExec,
-                "exec:java -Dexec.mainClass=\"framework.testng.report.TestsReportMerger\" -Dexec.args=\"${config.test.SUITE_TYPE} ${config.test.BUILD_NUMBER} ${serviceDir}/${config.test.SUITE_NAME} ${config.test.MAJOR_VERSION} ${config.test.MINOR_VERSION}\" -Dcloudify.home=${buildDir}",
+                "exec:java -Dexec.mainClass=\"framework.testng.report.TestsReportMerger\" -Dexec.args=\"${config.test.SUITE_TYPE} ${config.test.BUILD_NUMBER}"
+                        + " ${serviceDir}/${config.test.SUITE_NAME} ${config.test.MAJOR_VERSION} ${config.test.MINOR_VERSION}\" -Dcloudify.home=${buildDir}",
                 "${serviceDir}/${config.scm.projectName}")
         executeMaven(mvnExec,
-                "exec:java -Dexec.mainClass=\"framework.testng.report.wiki.WikiReporter\" -Dexec.args=\"${config.test.SUITE_TYPE} ${config.test.BUILD_NUMBER} ${serviceDir}/${config.test.SUITE_NAME} ${config.test.MAJOR_VERSION} ${config.test.MINOR_VERSION} ${config.test.BUILD_LOG_URL}\" -Dcloudify.home=${buildDir}",
+                "exec:java -Dexec.mainClass=\"framework.testng.report.wiki.WikiReporter\" -Dexec.args=\"${config.test.SUITE_TYPE} ${config.test.BUILD_NUMBER}"
+                        + " ${serviceDir}/${config.test.SUITE_NAME} ${config.test.MAJOR_VERSION} ${config.test.MINOR_VERSION} ${config.test.BUILD_LOG_URL}\""
+                        + " -Dcloudify.home=${buildDir} -Dmysql.host=${config.test.MGT_MACHINE}",
                 "${serviceDir}/${config.scm.projectName}")
 
         blobStore.clearContainer(containerName)
