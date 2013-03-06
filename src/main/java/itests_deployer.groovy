@@ -97,7 +97,7 @@ logger.info "strating itests suite with id: ${props["testRunId"]}"
 logger.info "checking if management machine is up"
 if (shouldBootstrap()){
     logger.info "management is down and should be bootstrapped"
-    config.MGT_MACHINE = cloudify("bootstrap-cloud ${commandOptions} ec2", true, false).find("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}")
+    config.MGT_MACHINE = cloudify("bootstrap-cloud ${commandOptions} ec2", true, false).find(~/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/)
     deployerPropertiesFile.withWriter {
         writer -> config.writeTo(writer)
     }
@@ -124,18 +124,21 @@ replaceTextInFile serviceFilePath, ["<name>" : props["testRunId"], "<numInstance
 logger.info "install service"
 cloudify "install-service ${commandOptions} ${scriptDir}/${props["testRunId"]}"
 
-logger.info "poll for suite completion"
+logger.info "wait for all ${props["<suite.number>"]} instances"
 int count
-while((count = cloudify("list-attributes -scope service:${props["testRunId"]}", true, true).find("\\{.*\\}").count(props["testRunId"])) > 0){
+while((count = cloudify("list-attributes -scope service:${props["testRunId"]}", true, true).find(~/\{.*\}/).count(props["testRunId"])) > props["<suite.number>"].toInteger()){
+    logger.info "test run ${props["testRunId"]} has only ${count} suites running"
+    sleep TimeUnit.SECONDS.toMillis(10)
+}
+
+logger.info "poll for suite completion"
+while((count = cloudify("list-attributes -scope service:${props["testRunId"]}", true, true).find(~/\{.*\}/).count(props["testRunId"])) > 0){
     logger.info "test run ${props["testRunId"]} has still ${count} suites running"
     sleep TimeUnit.MINUTES.toMillis(1)
 }
 
 logger.info "uninstall service"
 cloudify "uninstall-service ${commandOptions} ${props["testRunId"]}"
-
-logger.info "TODO merge reports and send mail..."
-testConfig = new ConfigSlurper().parse(new File(servicePropsPath).toURL())
 
 logger.info "removing ${props["testRunId"]} service dir"
 new File(props["testRunId"]).deleteDir()
