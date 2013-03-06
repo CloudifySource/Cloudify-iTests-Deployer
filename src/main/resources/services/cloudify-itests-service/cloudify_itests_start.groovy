@@ -7,12 +7,16 @@ import org.jclouds.ContextBuilder
 import org.jclouds.blobstore.BlobStoreContext
 
 import java.util.concurrent.TimeUnit
+import java.util.logging.Logger
 
 /**
  * User: Sagi Bernstein
  * Date: 10/02/13
  * Time: 12:06
  */
+
+Logger logger = Logger.getLogger(this.getClass().getName())
+
 
 def executeMaven (mvnExec, String arguments, directory){
     new AntBuilder().sequential{
@@ -28,11 +32,13 @@ serviceDir = "${System.getProperty("user.home")}/cloudify-itests-service"
 config = new ConfigSlurper().parse(new File("cloudify-itests.properties").toURL())
 context = ServiceContextFactory.getServiceContext()
 
+logger.info "started running instance: ${context.instanceId} of ${config.test.TEST_RUN_ID}"
+
+
 def buildDir = "${serviceDir}/${config.test.BUILD_DIR}"
 
 def ext = ServiceUtils.isWindows() ? ".bat" : "";
 def mvnBinDir = "${serviceDir}/maven/apache-maven-${config.maven.version}/bin"
-
 def mvnExec = mvnBinDir +"/mvn" + ext
 
 def arguments = "test -e -X -U -P tgrid-sgtest-cloudify " +
@@ -57,9 +63,10 @@ def arguments = "test -e -X -U -P tgrid-sgtest-cloudify " +
         "-Dcom.quality.sgtest.credentialsFolder=${context.getServiceDirectory()}/credentials"
 
 try{
+    logger.info "running ${mvnExec} in dir: ${${serviceDir}/${config.scm.projectName}} with arguments: ${arguments}"
     executeMaven mvnExec, arguments, "${serviceDir}/${config.scm.projectName}"
 }finally{
-
+    logger.info "finished running the tests"
     storageConfig = new ConfigSlurper().parse(new File("${context.getServiceDirectory()}/credentials/cloud/ec2/ec2-cred.properties").toURL())
     provider = "s3"
     blobStore  = ContextBuilder.newBuilder(provider)
@@ -69,6 +76,7 @@ try{
     containerName = "${config.test.TEST_RUN_ID}".toLowerCase()
     //Instance 1 does merger so no need to upload
     if (context.instanceId != 1){
+        logger.info "uploading the report file to ${provider}"
         // create container
         blobStore.createContainerInLocation(null, containerName)
         // add blob
@@ -77,17 +85,24 @@ try{
                 .payload(new File(reportFilePath)).build()
         blobStore.putBlob(containerName, blob)
     }
+
     context.attributes.thisService.remove "${config.test.TEST_RUN_ID}-${context.instanceId}"
 
     //Only instance 1 does report and mergers
     if (context.instanceId == 1){
-        while(context.attributes.thisService.grep("^\\${config.test.TEST_RUN_ID}.*").size() > 0){
+        logger.info "waiting for the rest of the instances to finish"
+        int count
+        while((count = context.attributes.thisService.grep("^\\${config.test.TEST_RUN_ID}.*").size()) > 0){
+            logger.info "still waiting for ${count} other instance(s) to finish"
             sleep TimeUnit.MINUTES.toMillis(1)
         }
         //Download from s3 bucket
+        logger.info "all instances finished! downloading the report files"
         blobStore.list(containerName).eachParallel {
+            def outputFileName = "${serviceDir}/${config.test.SUITE_NAME}/${it.getName()}"
+            logger.info "downloding file ${it.getName()} to ${outputFileName}"
             def input = blobStore.getBlob(containerName, it.getName()).getPayload().getInput()
-            def output = new FileOutputStream(new File("${serviceDir}/${config.test.SUITE_NAME}/${it.getName()}"))
+            def output = new FileOutputStream(new File(outputFileName))
             read = 0
             byte[] bytes = new byte[1024]
 
@@ -99,19 +114,23 @@ try{
             output.flush()
             output.close()
         }
+        logger.info "removing the container for the run"
+        blobStore.clearContainer(containerName)
+        blobStore.deleteContainer(containerName)
 
+        logger.info "running the tests reports merger"
         executeMaven(mvnExec,
                 "exec:java -Dexec.mainClass=\"framework.testng.report.TestsReportMerger\" -Dexec.args=\"${config.test.SUITE_TYPE} ${config.test.BUILD_NUMBER}"
                         + " ${serviceDir}/${config.test.SUITE_NAME} ${config.test.MAJOR_VERSION} ${config.test.MINOR_VERSION}\" -Dcloudify.home=${buildDir}",
                 "${serviceDir}/${config.scm.projectName}")
+
+        logger.info "running the wiki reporter"
         executeMaven(mvnExec,
                 "exec:java -Dexec.mainClass=\"framework.testng.report.wiki.WikiReporter\" -Dexec.args=\"${config.test.SUITE_TYPE} ${config.test.BUILD_NUMBER}"
-                        + " ${serviceDir}/${config.test.SUITE_NAME} ${config.test.MAJOR_VERSION} ${config.test.MINOR_VERSION} ${config.test.BUILD_LOG_URL}\""
+                        + " ${serviceDir}/${config.test.SUITE_NAME} ${config.test.MAJOR_VERSION} ${config.test.MINOR_VERSION}\""
                         + " -Dcloudify.home=${buildDir} -Dmysql.host=${config.test.MGT_MACHINE}",
                 "${serviceDir}/${config.scm.projectName}")
 
-        blobStore.clearContainer(containerName)
-        blobStore.deleteContainer(containerName)
     }
 
 
@@ -119,6 +138,7 @@ try{
 
     while(true){
         try{
+            logger.info "waiting for uninstall"
             sleep TimeUnit.MINUTES.toMillis(5)
         }catch(Exception e){
             break
