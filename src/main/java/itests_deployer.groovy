@@ -20,11 +20,10 @@ def i = 0
 
 //function definitions
 def cp(from, to){
-    new AntBuilder().sequential{
-        copy(todir : to){
+    new AntBuilder()
+        .copy(todir : to){
             fileset(dir : from)
         }
-    }
 }
 
 def replaceTextInFile(String filePath, Map<String, String> properties){
