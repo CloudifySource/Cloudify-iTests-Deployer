@@ -1,5 +1,6 @@
-@Grab(group = "org.eclipse.jgit", module = "org.eclipse.jgit", version = "2.2.0.201212191850-r")
-
+@Grapes(
+    @Grab(group = 'org.eclipse.jgit', module = 'org.eclipse.jgit', version = '2.2.0.201212191850-r')
+)
 import org.cloudifysource.dsl.context.ServiceContextFactory
 import org.cloudifysource.dsl.utils.ServiceUtils
 import org.eclipse.jgit.api.Git
@@ -21,8 +22,10 @@ serviceDir = "${System.getProperty("user.home")}/cloudify-itests-service"
 def context = ServiceContextFactory.getServiceContext()
 
 
-new AntBuilder().sequential{
-    mkdir(dir:serviceDir)
+new AntBuilder().mkdir(dir:serviceDir)
+
+def chmod(folder){
+    new AntBuilder().chmod(dir: folder, perm:'+x', includes:"**/*")
 }
 
 def install(installDir, downloadPath, zipName) {
@@ -35,8 +38,11 @@ def install(installDir, downloadPath, zipName) {
 
 def pool = Executors.newCachedThreadPool()
 results = pool.invokeAll([
-        { install("${serviceDir}/${config.cloudify.installDir}", config.cloudify.downloadPath, config.cloudify.zipName) },
-        { install("${serviceDir}/${config.maven.installDir}", config.maven.downloadPath, config.maven.zipName) },
+        { install("${serviceDir}/${config.cloudify.installDir}", config.cloudify.downloadPath, config.cloudify.zipName)
+            chmod("${serviceDir}/${config.cloudify.installDir}/bin")
+            chmod("${serviceDir}/${config.cloudify.installDir}/lib") },
+        { install("${serviceDir}/${config.maven.installDir}", config.maven.downloadPath, config.maven.zipName)
+            chmod("${serviceDir}/${config.maven.installDir}/bin") },
         {
             switch(config.scm.type){
 
@@ -53,8 +59,9 @@ results = pool.invokeAll([
                     branchName = 'dummy' == "${config.scm.branchName}" ? 'master' : "${config.scm.branchName}"
                     clone.setDirectory(gitDir)
                             .setURI("${config.git.checkoutUrl}")
+                            .setBranchesToClone([branchName])
                             .setBranch(branchName)
-
+                            .setCloneAllBranches(false)
                     clone.call()
                     break
 
