@@ -13,7 +13,7 @@ Logger logger = Logger.getLogger(this.getClass().getName())
 scriptDir = new File(getClass().protectionDomain.codeSource.location.path).parent
 commandOptions="--verbose -timeout 15"
 deployerPropertiesFile = new File("${scriptDir}/deployer.properties")
-config= new ConfigSlurper().parse(deployerPropertiesFile.toURL())
+config= new ConfigSlurper().parse(deployerPropertiesFile.text)
 def props = [:] as Map<String, String>
 def i = 0
 
@@ -87,7 +87,7 @@ props["<xap.jdk>"] = args[i++]             //12
 props["<sgtest.jdk>"] = args[i++]          //13
 props["<sgtest.jvm.settings>"] = args[i]   //14
 props["<milestoneUpperCase>"] = "SNAPSHOT" //props["<milestone>"].toUpperCase()
-props["testRunId"] = "${props["<suite.name>"]}-${System.currentTimeMillis()}"
+props["testRunId"] = "${props["<suite.name>"]}-${new Date().format 'dd-MM-yyyy-hh-mm-ss' }"
 
 
 logger.info "strating itests suite with id: ${props["testRunId"]}"
@@ -124,13 +124,14 @@ cloudify "install-service ${commandOptions} ${scriptDir}/${props["testRunId"]}"
 
 logger.info "wait for all ${props["<suite.number>"]} instances"
 int count
-while((count = cloudify("list-attributes -scope service:${props["testRunId"]}", true, true).find(~/\{.*\}/).count(props["testRunId"])) > props["<suite.number>"].toInteger()){
+def counter = {return cloudify("list-attributes -scope service:${props["testRunId"]}", true, true).find(~/\{.*\}/).count(props["testRunId"])}
+while((count =  counter())> props["<suite.number>"].toInteger()){
     logger.info "test run ${props["testRunId"]} has only ${count} suites running"
     sleep TimeUnit.SECONDS.toMillis(10)
 }
 
 logger.info "poll for suite completion"
-while((count = cloudify("list-attributes -scope service:${props["testRunId"]}", true, true).find(~/\{.*\}/).count(props["testRunId"])) > 0){
+while((count = counter()) > 0){
     logger.info "test run ${props["testRunId"]} has still ${count} suites running"
     sleep TimeUnit.MINUTES.toMillis(1)
 }

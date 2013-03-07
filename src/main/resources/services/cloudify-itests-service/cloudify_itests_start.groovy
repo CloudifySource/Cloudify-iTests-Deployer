@@ -18,7 +18,7 @@ import java.util.logging.Logger
 def executeMaven (mvnExec, String arguments, directory){
     new AntBuilder().sequential{
         exec(executable: mvnExec,
-                failonerror:true,
+                failonerror:false,
                 dir:directory) {
             arguments.split(" ").each { arg(value: it) }
         }
@@ -37,7 +37,7 @@ logger.info "started running instance: ${context.instanceId} of ${config.test.TE
 
 def buildDir = "${serviceDir}/${config.test.BUILD_DIR}"
 
-def ext = ServiceUtils.isWindows() ? '.bat' : ""
+def ext = ServiceUtils.isWindows() ? '.bat' : ''
 def mvnBinDir = "${serviceDir}/maven/apache-maven-${config.maven.version}/bin"
 def mvnExec = "${mvnBinDir}/mvn${ext}"
 
@@ -94,7 +94,8 @@ try{
     if (context.instanceId == 1){
         logger.info "waiting for the rest of the instances to finish"
         int count
-        while((count = context.attributes.thisService.grep("^\\${config.test.TEST_RUN_ID}.*").size()) > 0){
+        def counter = {return context.attributes.thisService.grep("^\\${config.test.TEST_RUN_ID}.*").size()}
+        while((count = counter()) > 0){
             logger.info "still waiting for ${count} other instance(s) to finish"
             sleep TimeUnit.MINUTES.toMillis(1)
         }
@@ -121,15 +122,15 @@ try{
         blobStore.deleteContainer(containerName)
 
         logger.info "running the tests reports merger"
-	versionSplit = "${config.cloudify.version}".split(/./)
+        versionSplit = "${config.cloudify.version}".split("\\.")
         executeMaven(mvnExec,
-                "exec:java -Dexec.mainClass=\"framework.testng.report.TestsReportMerger\" -Dexec.args=\"${config.test.SUITE_TYPE} ${config.test.BUILD_NUMBER}"
+                "exec:java -Dexec.mainClass=\"framework.testng.report.TestsReportMerger\" -Dexec.args=\"${config.test.SUITE_NAME} ${config.test.BUILD_NUMBER}"
                         + " ${serviceDir}/${config.test.SUITE_NAME} ${versionSplit[0]} ${versionSplit[1]}\" -Dcloudify.home=${buildDir}",
                 "${serviceDir}/${config.scm.projectName}")
 
         logger.info "running the wiki reporter"
         executeMaven(mvnExec,
-                "exec:java -Dexec.mainClass=\"framework.testng.report.wiki.WikiReporter\" -Dexec.args=\"${config.test.SUITE_TYPE} ${config.test.BUILD_NUMBER}"
+                "exec:java -Dexec.mainClass=\"framework.testng.report.wiki.WikiReporter\" -Dexec.args=\"Regression ${config.test.BUILD_NUMBER}"
                         + " ${serviceDir}/${config.test.SUITE_NAME} ${versionSplit[0]} ${versionSplit[1]}\""
                         + " -Dcloudify.home=${buildDir} -Dmysql.host=${config.test.MGT_MACHINE}",
                 "${serviceDir}/${config.scm.projectName}")
@@ -143,7 +144,7 @@ try{
         try{
             logger.info "waiting for uninstall"
             sleep TimeUnit.MINUTES.toMillis(5)
-        }catch(Exception e){
+        }catch(Exception ignored){
             break
         }
     }
