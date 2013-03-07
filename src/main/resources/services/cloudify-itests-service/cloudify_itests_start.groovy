@@ -1,8 +1,8 @@
 @Grapes(
         @Grab(group='org.jclouds.api', module='s3', version='1.5.8')
 )
-//import org.cloudifysource.dsl.context.ServiceContextFactory
-//import org.cloudifysource.dsl.utils.ServiceUtils
+import org.cloudifysource.dsl.context.ServiceContextFactory
+import org.cloudifysource.dsl.utils.ServiceUtils
 import org.jclouds.ContextBuilder
 import org.jclouds.blobstore.BlobStoreContext
 
@@ -29,17 +29,17 @@ def executeMaven (mvnExec, String arguments, directory){
 
 Logger logger = Logger.getLogger(this.getClass().getName())
 serviceDir = "${System.getProperty("user.home")}/cloudify-itests-service"
-config = new ConfigSlurper().parse(new File("cloudify-itests.properties").toURL())
-//context = ServiceContextFactory.getServiceContext()
+config = new ConfigSlurper().parse(new File("cloudify-itests.properties").text)
+context = ServiceContextFactory.getServiceContext()
 
-//logger.info "started running instance: ${context.instanceId} of ${config.test.TEST_RUN_ID}"
+logger.info "started running instance: ${context.instanceId} of ${config.test.TEST_RUN_ID}"
 
 
 def buildDir = "${serviceDir}/${config.test.BUILD_DIR}"
 
-//def ext = ServiceUtils.isWindows() ? ".bat" : "";
+def ext = ServiceUtils.isWindows() ? '.bat' : ""
 def mvnBinDir = "${serviceDir}/maven/apache-maven-${config.maven.version}/bin"
-def mvnExec = mvnBinDir +"/mvn" //+ ext
+def mvnExec = "${mvnBinDir}/mvn${ext}"
 
 def arguments = "test -e -X -U -P tgrid-sgtest-cloudify " +
         "-Dsgtest.cloud.enabled=true " +
@@ -50,7 +50,7 @@ def arguments = "test -e -X -U -P tgrid-sgtest-cloudify " +
         "-Djava.security.policy=policy/policy.all " +
         "-Djava.awt.headless=true " +
         "-Dsgtest.suiteName=${config.test.SUITE_NAME} " +
-        "-DiTests.suiteId=1 " + //${context.instanceId}" +
+        "-DiTests.suiteId=${context.instanceId}" +
         "-Dsgtest.summary.dir=${serviceDir}/${config.test.SUITE_NAME} " +
         "-DiTests.numOfSuites=${config.test.SUITE_NUMBER} " +
         "-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Jdk14Logger " +
@@ -60,39 +60,38 @@ def arguments = "test -e -X -U -P tgrid-sgtest-cloudify " +
         "-Dec2.region=${config.test.EC2_REGION} " +
         "-DipList=${config.test.BYON_MACHINES} " +
         "-Dsupported-clouds=${config.test.SUPPORTED_CLOUDS} " +
-        "-Dcom.quality.sgtest.credentialsFolder=/export/users/sagib/cloudify-workspace/Cloudify-iTests/src/main/resources/credentials"
-        //${context.getServiceDirectory()}/credentials"
+        "-Dcom.quality.sgtest.credentialsFolder=${context.getServiceDirectory()}/credentials"
 
 try{
-    logger.info "running ${mvnExec} in dir: ${${serviceDir}/${config.scm.projectName}} with arguments: ${arguments}"
+    logger.info "running ${mvnExec} in dir: ${serviceDir}/${config.scm.projectName} with arguments: ${arguments}"
     executeMaven mvnExec, arguments, "${serviceDir}/${config.scm.projectName}"
 }finally{
     logger.info "finished running the tests"
-    def file = new File("/export/users/sagib/cloudify-workspace/Cloudify-iTests/src/main/resources/credentials/cloud/ec2/ec2-cred.properties")
-    storageConfig = new ConfigSlurper().parse(file.text)
-    provider = "s3"
-    logger.info "credentails are ${storageConfig.user} ${storageConfig.apiKey}"
+    strorageProps = new Properties()
+    strorageProps.load new FileInputStream(new File("${context.getServiceDirectory()}/credentials/cloud/ec2/ec2-cred.properties"))
+    storageConfig = new ConfigSlurper().parse(strorageProps)
+    provider = 's3'
     blobStore  = ContextBuilder.newBuilder(provider)
             .credentials("${storageConfig.user}", "${storageConfig.apiKey}")
             .buildView(BlobStoreContext.class).getBlobStore()
 
     containerName = "${config.test.TEST_RUN_ID}".toLowerCase()
     //Instance 1 does merger so no need to upload
-    if (1 == 1){
+    if (context.instanceId == 1){
         logger.info "uploading the report file to ${provider}"
         // create container
         blobStore.createContainerInLocation(null, containerName)
         // add blob
-        def reportFilePath = "${serviceDir}/${config.test.SUITE_NAME}/sgtest-result-${config.test.SUITE_NAME}1.xml"
+        def reportFilePath = "${serviceDir}/${config.test.SUITE_NAME}/sgtest-result-${config.test.SUITE_NAME}${context.instanceId}.xml"
         blob = blobStore.blobBuilder(reportFilePath)
                 .payload(new File(reportFilePath)).build()
         blobStore.putBlob(containerName, blob)
     }
 
-    //context.attributes.thisService.remove "${config.test.TEST_RUN_ID}-${context.instanceId}"
+    context.attributes.thisService.remove "${config.test.TEST_RUN_ID}-${context.instanceId}"
 
     //Only instance 1 does report and mergers
-    if (1 == 1){
+    if (context.instanceId == 1){
         logger.info "waiting for the rest of the instances to finish"
         int count
         while((count = context.attributes.thisService.grep("^\\${config.test.TEST_RUN_ID}.*").size()) > 0){
@@ -122,15 +121,16 @@ try{
         blobStore.deleteContainer(containerName)
 
         logger.info "running the tests reports merger"
+	versionSplit = "${config.cloudify.version}".split(/./)
         executeMaven(mvnExec,
                 "exec:java -Dexec.mainClass=\"framework.testng.report.TestsReportMerger\" -Dexec.args=\"${config.test.SUITE_TYPE} ${config.test.BUILD_NUMBER}"
-                        + " ${serviceDir}/${config.test.SUITE_NAME} ${config.test.MAJOR_VERSION} ${config.test.MINOR_VERSION}\" -Dcloudify.home=${buildDir}",
+                        + " ${serviceDir}/${config.test.SUITE_NAME} ${versionSplit[0]} ${versionSplit[1]}\" -Dcloudify.home=${buildDir}",
                 "${serviceDir}/${config.scm.projectName}")
 
         logger.info "running the wiki reporter"
         executeMaven(mvnExec,
                 "exec:java -Dexec.mainClass=\"framework.testng.report.wiki.WikiReporter\" -Dexec.args=\"${config.test.SUITE_TYPE} ${config.test.BUILD_NUMBER}"
-                        + " ${serviceDir}/${config.test.SUITE_NAME} ${config.test.MAJOR_VERSION} ${config.test.MINOR_VERSION}\""
+                        + " ${serviceDir}/${config.test.SUITE_NAME} ${versionSplit[0]} ${versionSplit[1]}\""
                         + " -Dcloudify.home=${buildDir} -Dmysql.host=${config.test.MGT_MACHINE}",
                 "${serviceDir}/${config.scm.projectName}")
 
