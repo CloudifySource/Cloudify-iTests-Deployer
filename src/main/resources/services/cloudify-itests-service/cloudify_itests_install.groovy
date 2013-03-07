@@ -44,6 +44,7 @@ results = pool.invokeAll([
         { install("${serviceDir}/${config.maven.installDir}", config.maven.downloadPath, config.maven.zipName)
             chmod("${serviceDir}/maven/apache-maven-${config.maven.version}/bin") },
         {
+            branchName = 'dummy' == "${config.scm.branchName}" ? 'master' : "${config.scm.branchName}"
             switch(config.scm.type){
 
                 case "git":
@@ -56,8 +57,7 @@ results = pool.invokeAll([
 
                     git = new Git(repository)
                     clone = git.cloneRepository()
-                    branchName = 'dummy' == "${config.scm.branchName}" ? 'master' : "${config.scm.branchName}"
-                    clone.setDirectory(gitDir)
+                            .setDirectory(gitDir)
                             .setURI("${config.git.checkoutUrl}")
                             .setBranchesToClone([branchName])
                             .setBranch(branchName)
@@ -78,6 +78,12 @@ results = pool.invokeAll([
                             arg(value:'--force')
                             arg(value:"${serviceDir}/${config.scm.projectName}")
                         }
+                    }
+                    break
+                case "zip":
+                    install("${serviceDir}", "https://github.com/CloudifySource/Cloudify-iTests/archive/${branchName}.zip", "Cloudify-iTests-${branchName}.zip")
+                    new AntBuilder().move(todir : "${config.scm.projectName}"){
+                        fileset(dir : "Cloudify-iTests-${branchName}")
                     }
             }
         }])
