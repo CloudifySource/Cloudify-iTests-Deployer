@@ -16,12 +16,11 @@ import java.util.logging.Logger
  */
 
 def executeMaven (mvnExec, String arguments, directory){
-    new AntBuilder().sequential{
-        exec(executable: mvnExec,
-                failonerror:false,
-                dir:directory) {
-            arguments.split(" ").each { arg(value: it) }
-        }
+    new AntBuilder().exec(executable: mvnExec,
+            failonerror:false,
+            dir:directory) {
+        env(key:'JAVA_HOME',value:"${System.getProperty("user.home")}/java")
+        arg(line: arguments)
     }
 }
 
