@@ -130,7 +130,7 @@ try{
 
         logger.info "running the wiki reporter"
         executeMaven(mvnExec,
-                "exec:java -Dexec.mainClass=\"framework.testng.report.wiki.WikiReporter\" -Dexec.args=\"Regression ${config.test.BUILD_NUMBER}"
+                "exec:java -Dexec.mainClass=\"framework.testng.report.wiki.WikiReporter\" -Dexec.args=\"${config.test.SUITE_TYPE} ${config.test.BUILD_NUMBER}"
                         + " ${serviceDir}/${config.test.SUITE_NAME} ${versionSplit[0]} ${versionSplit[1]}\""
                         + " -Dcloudify.home=${buildDir} -Dmysql.host=${config.test.MGT_MACHINE}",
                 "${serviceDir}/${config.scm.projectName}")
