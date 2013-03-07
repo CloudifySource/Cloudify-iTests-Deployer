@@ -35,29 +35,30 @@ def install(installDir, downloadPath, zipName) {
 
 def pool = Executors.newCachedThreadPool()
 results = pool.invokeAll([
-    { install("${serviceDir}/${config.cloudify.installDir}", config.cloudify.downloadPath, config.cloudify.zipName) },
-    { install("${serviceDir}/${config.maven.installDir}", config.maven.downloadPath, config.maven.zipName) },
-    {
-        switch(config.scm.type){
-        
-            case "git":
+        { install("${serviceDir}/${config.cloudify.installDir}", config.cloudify.downloadPath, config.cloudify.zipName) },
+        { install("${serviceDir}/${config.maven.installDir}", config.maven.downloadPath, config.maven.zipName) },
+        {
+            switch(config.scm.type){
+
+                case "git":
                     def gitDir = new File("${serviceDir}/${config.scm.projectName}")
                     FileRepositoryBuilder repBuilder = new FileRepositoryBuilder()
                     repository = repBuilder.setGitDir(gitDir)
                             .readEnvironment()
                             .findGitDir()
                             .build()
-    
+
                     git = new Git(repository)
                     clone = git.cloneRepository()
+                    branchName = 'dummy' == "${config.scm.branchName}" ? 'master' : "${config.scm.branchName}"
                     clone.setDirectory(gitDir)
                             .setURI("${config.git.checkoutUrl}")
-                    if ('dummy' != "${config.scm.branchName}")
-                        clone.setBranch("${config.scm.branchName}")
-                    clone.call()
-                break
+                            .setBranch(branchName)
 
-            case "svn":
+                    clone.call()
+                    break
+
+                case "svn":
                     install("${serviceDir}/${config.svn.installDir}", config.svn.downloadPath, config.svn.zipName)
                     ext = ServiceUtils.isWindows() ? '.bat' : ''
                     svnBinDir = "${serviceDir}/svn/svnkit-${config.svn.version}/bin"
@@ -71,8 +72,8 @@ results = pool.invokeAll([
                             arg(value:"${serviceDir}/${config.scm.projectName}")
                         }
                     }
-        }
-    }])
+            }
+        }])
 try{
 
     results.each { it.get(15, TimeUnit.MINUTES) }
