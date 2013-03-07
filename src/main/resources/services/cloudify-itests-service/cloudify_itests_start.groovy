@@ -40,7 +40,7 @@ def ext = ServiceUtils.isWindows() ? '.bat' : ''
 def mvnBinDir = "${serviceDir}/maven/apache-maven-${config.maven.version}/bin"
 def mvnExec = "${mvnBinDir}/mvn${ext}"
 
-def arguments = "test -e -X -U -P tgrid-sgtest-cloudify " +
+def arguments = "test -e -X -U -P tgrid-cloudify-iTests " +
         "-Dsgtest.cloud.enabled=true " +
         "-DiTests.buildNumber=${config.test.BUILD_NUMBER} " +
         "-Dcloudify.home=${buildDir} " +
