@@ -77,7 +77,7 @@ try{
 
     containerName = "${config.test.TEST_RUN_ID}".toLowerCase()
     //Instance 1 does merger so no need to upload
-    if (context.instanceId == 1){
+    if (context.instanceId != 1){
         logger.info "uploading the report file to ${provider}"
         // create container
         blobStore.createContainerInLocation(null, containerName)
