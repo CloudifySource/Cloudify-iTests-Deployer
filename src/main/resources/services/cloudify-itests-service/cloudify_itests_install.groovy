@@ -39,10 +39,10 @@ def install(installDir, downloadPath, zipName) {
 def pool = Executors.newCachedThreadPool()
 results = pool.invokeAll([
         { install("${serviceDir}/${config.cloudify.installDir}", config.cloudify.downloadPath, config.cloudify.zipName)
-            chmod("${serviceDir}/${config.cloudify.installDir}/bin")
-            chmod("${serviceDir}/${config.cloudify.installDir}/lib") },
+            chmod("${serviceDir}/${config.test.BUILD_DIR}/bin")
+            chmod("${serviceDir}/${config.test.BUILD_DIR}/lib") },
         { install("${serviceDir}/${config.maven.installDir}", config.maven.downloadPath, config.maven.zipName)
-            chmod("${serviceDir}/${config.maven.installDir}/bin") },
+            chmod("${serviceDir}/maven/apache-maven-${config.maven.version}/bin") },
         {
             switch(config.scm.type){
 
