@@ -95,7 +95,7 @@ logger.info "strating itests suite with id: ${props["testRunId"]}"
 logger.info "checking if management machine is up"
 if (shouldBootstrap()){
     logger.info "management is down and should be bootstrapped"
-    config.MGT_MACHINE = cloudify("bootstrap-cloud ${commandOptions} ec2", true, false).find(~/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/)
+    config.MGT_MACHINE = cloudify("bootstrap-cloud ${commandOptions} ec2", true, false).find("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}")
     deployerPropertiesFile.withWriter {
         writer -> config.writeTo(writer)
     }
@@ -124,7 +124,7 @@ cloudify "install-service ${commandOptions} ${scriptDir}/${props["testRunId"]}"
 
 logger.info "wait for all ${props["<suite.number>"]} instances"
 int count
-def counter = {return cloudify("list-attributes -scope service:${props["testRunId"]}", true, true).find(~/\{.*\}/).count(props["testRunId"])}
+def counter = {return cloudify("list-attributes -scope service:${props["testRunId"]}", true, true).find("\\{.*\\}").count(props["testRunId"])}
 while((count = counter())> props["<suite.number>"].toInteger()){
     logger.info "test run ${props["testRunId"]} has only ${count} suites running"
     sleep TimeUnit.SECONDS.toMillis(10)
