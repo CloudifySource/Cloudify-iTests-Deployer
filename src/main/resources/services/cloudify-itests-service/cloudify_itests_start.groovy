@@ -83,7 +83,7 @@ try{
         // add blob
         reportName = "${config.test.SUITE_NAME}${context.instanceId}"
         def reportFilePath = "${serviceDir}/${config.scm.projectName}/target/surefire-reports/${reportName}/${reportName}.xml"
-        blob = blobStore.blobBuilder(reportFilePath)
+        blob = blobStore.blobBuilder("${reportName}.xml")
                 .payload(new File(reportFilePath)).build()
         blobStore.putBlob(containerName, blob)
     }
