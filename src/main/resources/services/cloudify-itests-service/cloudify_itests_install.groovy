@@ -40,7 +40,8 @@ def pool = Executors.newCachedThreadPool()
 results = pool.invokeAll([
         { install("${serviceDir}/${config.cloudify.installDir}", config.cloudify.downloadPath, config.cloudify.zipName)
             chmod("${serviceDir}/${config.test.BUILD_DIR}/bin")
-            chmod("${serviceDir}/${config.test.BUILD_DIR}/lib") },
+            chmod("${serviceDir}/${config.test.BUILD_DIR}/lib") 
+            chmod("${serviceDir}/${config.test.BUILD_DIR}/tools") },
         { install("${serviceDir}/${config.maven.installDir}", config.maven.downloadPath, config.maven.zipName)
             chmod("${serviceDir}/maven/apache-maven-${config.maven.version}/bin") },
         {
