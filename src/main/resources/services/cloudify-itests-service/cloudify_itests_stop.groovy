@@ -2,7 +2,6 @@
         @Grab(group='org.jclouds.api', module='s3', version='1.5.8')
 )
 import org.cloudifysource.dsl.context.ServiceContextFactory
-import org.cloudifysource.dsl.utils.ServiceUtils
 import org.jclouds.ContextBuilder
 import org.jclouds.blobstore.BlobStoreContext
 
@@ -30,10 +29,7 @@ if (context.instanceId == 1){
   serviceDir = "${System.getProperty("user.home")}/cloudify-itests-service"
   config = new ConfigSlurper().parse(new File("cloudify-itests.properties").text)
   
-  
-  def ext = ServiceUtils.isWindows() ? '.bat' : ''
-  def mvnBinDir = "${serviceDir}/maven/apache-maven-${config.maven.version}/bin"
-  def mvnExec = "${mvnBinDir}/mvn${ext}"
+  def mvnExec = "${serviceDir}/maven/apache-maven-${config.maven.version}/bin/mvn"
   
   strorageProps = new Properties()
   strorageProps.load new FileInputStream(new File("${context.getServiceDirectory()}/credentials/cloud/ec2/ec2-cred.properties"))
