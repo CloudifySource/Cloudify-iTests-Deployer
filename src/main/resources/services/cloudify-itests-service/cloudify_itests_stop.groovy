@@ -8,6 +8,15 @@ import org.jclouds.blobstore.BlobStoreContext
 
 import java.util.logging.Logger    
 
+def executeMaven (mvnExec, String arguments, directory){
+        new AntBuilder().exec(executable: mvnExec,
+                failonerror:false,
+                dir:directory) {
+                        env(key:'JAVA_HOME',value:"${System.getProperty("user.home")}/java")
+                        arg(line: arguments)
+                        }
+}
+
 
 context = ServiceContextFactory.getServiceContext()
 Logger logger = Logger.getLogger(this.getClass().getName())
@@ -17,18 +26,7 @@ Logger logger = Logger.getLogger(this.getClass().getName())
 //Only instance 1 does report and mergers
 if (context.instanceId == 1){
   logger.info "service instance: 1 - merging and reporting"
-  
-  def executeMaven (mvnExec, String arguments, directory){
-      new AntBuilder().exec(executable: mvnExec,
-              failonerror:false,
-              dir:directory) {
-          env(key:'JAVA_HOME',value:"${System.getProperty("user.home")}/java")
-          arg(line: arguments)
-      }
-  }
-  
-
-  
+   
   serviceDir = "${System.getProperty("user.home")}/cloudify-itests-service"
   config = new ConfigSlurper().parse(new File("cloudify-itests.properties").text)
   
