@@ -125,7 +125,7 @@ cloudify "install-service ${commandOptions} ${scriptDir}/${props["testRunId"]}"
 logger.info "wait for all ${props["<suite.number>"]} instances"
 int count
 def counter = {return cloudify("list-attributes -scope service:${props["testRunId"]}", true, true).find("\\{.*\\}").count(props["testRunId"])}
-while((count = counter())> props["<suite.number>"].toInteger()){
+while((count = counter()) < props["<suite.number>"].toInteger()){
     logger.info "test run ${props["testRunId"]} has only ${count} suites running"
     sleep TimeUnit.SECONDS.toMillis(10)
 }
