@@ -2,7 +2,6 @@
         @Grab(group='org.jclouds.api', module='s3', version='1.5.8')
 )
 import org.cloudifysource.dsl.context.ServiceContextFactory
-import org.cloudifysource.dsl.utils.ServiceUtils
 import org.jclouds.ContextBuilder
 import org.jclouds.blobstore.BlobStoreContext
 
@@ -36,9 +35,7 @@ logger.info "started running instance: ${context.instanceId} of ${config.test.TE
 
 def buildDir = "${serviceDir}/${config.test.BUILD_DIR}"
 
-def ext = ServiceUtils.isWindows() ? '.bat' : ''
-def mvnBinDir = "${serviceDir}/maven/apache-maven-${config.maven.version}/bin"
-def mvnExec = "${mvnBinDir}/mvn${ext}"
+def mvnExec = "${serviceDir}/maven/apache-maven-${config.maven.version}/bin/mvn"
 
 def arguments = "test -e -X -U -P tgrid-cloudify-iTests " +
         "-Dsgtest.cloud.enabled=true " +
