@@ -41,7 +41,7 @@ if (context.instanceId == 1){
 
   containerName = "${config.test.TEST_RUN_ID}".toLowerCase()
   reportName = "${config.test.SUITE_NAME}${context.instanceId}"
-  reportDirPath = "${serviceDir}/${config.scm.projectName}/target/surefire-reports/${reportName}
+  reportDirPath = "${serviceDir}/${config.scm.projectName}/target/surefire-reports/${reportName}"
 
   //Download from s3 bucket
   logger.info "downloading the report files"
