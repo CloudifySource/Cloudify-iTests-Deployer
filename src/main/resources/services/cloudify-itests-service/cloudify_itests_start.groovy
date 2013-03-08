@@ -48,7 +48,7 @@ def arguments = "test -e -X -U -P tgrid-cloudify-iTests " +
         "-Dexcludes=${config.test.EXCLUDE} " +
         "-Djava.security.policy=policy/policy.all " +
         "-Djava.awt.headless=true " +
-        "-Dsgtest.suiteName=${config.test.SUITE_NAME} " +
+        "-DiTests.suiteName=${config.test.SUITE_NAME} " +
         "-DiTests.suiteId=${context.instanceId} " +
         "-Dsgtest.summary.dir=${serviceDir}/${config.test.SUITE_NAME} " +
         "-DiTests.numOfSuites=${config.test.SUITE_NUMBER} " +
@@ -81,7 +81,8 @@ try{
         // create container
         blobStore.createContainerInLocation(null, containerName)
         // add blob
-        def reportFilePath = "${serviceDir}/${config.test.SUITE_NAME}/sgtest-result-${config.test.SUITE_NAME}${context.instanceId}.xml"
+        reportName = "${config.test.SUITE_NAME}${context.instanceId}"
+        def reportFilePath = "${serviceDir}/${config.scm.projectName}/target/surefire-reports/${reportName}/${reportName}.xml"
         blob = blobStore.blobBuilder(reportFilePath)
                 .payload(new File(reportFilePath)).build()
         blobStore.putBlob(containerName, blob)
