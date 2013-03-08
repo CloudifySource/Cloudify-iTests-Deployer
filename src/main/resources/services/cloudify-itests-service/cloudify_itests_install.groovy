@@ -80,11 +80,13 @@ results = pool.invokeAll([
                         }
                     }
                     break
+                    
                 case "zip":
                     install("${serviceDir}", "https://github.com/CloudifySource/Cloudify-iTests/archive/${branchName}.zip", "Cloudify-iTests-${branchName}.zip")
                     new AntBuilder().move(todir : "${serviceDir}/${config.scm.projectName}"){
                         fileset(dir : "${serviceDir}/Cloudify-iTests-${branchName}")
                     }
+                    
             }
         }])
 try{
