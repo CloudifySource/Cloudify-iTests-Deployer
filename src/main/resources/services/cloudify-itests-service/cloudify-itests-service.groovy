@@ -1,4 +1,3 @@
-
 /**
  * User: Sagi Bernstein
  * Date: 10/02/13
@@ -18,5 +17,6 @@ service {
         locator {
             NO_PROCESS_LOCATORS
         }
+        stop "cloudify_itests_stop.groovy"
     }
 }
