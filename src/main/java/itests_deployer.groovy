@@ -35,8 +35,6 @@ def replaceTextInFile(String filePath, Map<String, String> properties){
     file.write(propsText)
 }
 
-
-
 def cloudify(arguments, capture, shouldConnect){
     def output = new ByteArrayOutputStream()
     ant = new AntBuilder()
@@ -46,7 +44,7 @@ def cloudify(arguments, capture, shouldConnect){
                 it.setOutputPrintStream(new PrintStream(output))
 	    }
         }
-2    }
+    }
     ant.sequential{
         if(shouldConnect){
             arguments = "connect ${config.MGT_MACHINE};" + arguments
@@ -122,15 +120,10 @@ replaceTextInFile serviceFilePath, ["<name>" : props["testRunId"], "<numInstance
 logger.info "install service"
 cloudify "install-service ${commandOptions} ${scriptDir}/${props["testRunId"]}"
 
-logger.info "wait for all ${props["<suite.number>"]} instances"
+logger.info "poll for suite completion"
 int count
 def counter = {return cloudify("list-attributes -scope service:${props["testRunId"]}", true, true).find("\\{.*\\}").count(props["testRunId"])}
-while((count = counter()) < props["<suite.number>"].toInteger()){
-    logger.info "test run ${props["testRunId"]} has only ${count} suites running"
-    sleep TimeUnit.SECONDS.toMillis(10)
-}
 
-logger.info "poll for suite completion"
 while((count = counter()) > 0){
     logger.info "test run ${props["testRunId"]} has still ${count} suites running"
     sleep TimeUnit.MINUTES.toMillis(1)
