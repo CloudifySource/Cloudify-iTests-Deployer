@@ -44,12 +44,13 @@ if (context.instanceId == 1){
             .buildView(BlobStoreContext.class).getBlobStore()
 
   containerName = "${config.test.TEST_RUN_ID}".toLowerCase()
-        
+  reportName = "${config.test.SUITE_NAME}${context.instanceId}"
+  reportDirPath = "${serviceDir}/${config.scm.projectName}/target/surefire-reports/${reportName}
 
   //Download from s3 bucket
   logger.info "downloading the report files"
   blobStore.list(containerName).eachParallel {
-    def outputFileName = "${serviceDir}/${config.test.SUITE_NAME}/${it.getName()}"
+    def outputFileName = "${reportDirPath}/${it.getName()}"
     logger.info "downloding file ${it.getName()} to ${outputFileName}"
     def input = blobStore.getBlob(containerName, it.getName()).getPayload().getInput()
     def output = new FileOutputStream(new File(outputFileName))
@@ -73,13 +74,13 @@ if (context.instanceId == 1){
   versionSplit = "${config.cloudify.version}".split("\\.")
   executeMaven(mvnExec,
     "exec:java -Dexec.mainClass=\"framework.testng.report.TestsReportMerger\" -Dexec.args=\"${config.test.SUITE_NAME} ${config.test.BUILD_NUMBER}"
-                        + " ${serviceDir}/${config.test.SUITE_NAME} ${versionSplit[0]} ${versionSplit[1]}\" -Dcloudify.home=${buildDir}",
+                        + " ${reportDirPath} ${versionSplit[0]} ${versionSplit[1]}\" -Dcloudify.home=${buildDir}",
                 "${serviceDir}/${config.scm.projectName}")
 
   logger.info "running the wiki reporter"
   executeMaven(mvnExec,
     "exec:java -Dexec.mainClass=\"framework.testng.report.wiki.WikiReporter\" -Dexec.args=\"${config.test.SUITE_TYPE} ${config.test.BUILD_NUMBER}"
-                        + " ${serviceDir}/${config.test.SUITE_NAME} ${versionSplit[0]} ${versionSplit[1]}\""
+                        + " ${reportDirPath} ${versionSplit[0]} ${versionSplit[1]}\""
                         + " -Dcloudify.home=${buildDir} -Dmysql.host=${config.test.MGT_MACHINE}",
                 "${serviceDir}/${config.scm.projectName}")
 
