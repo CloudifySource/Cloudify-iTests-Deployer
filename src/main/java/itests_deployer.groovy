@@ -125,7 +125,7 @@ int count
 def counter = {return cloudify("list-attributes -scope service:${props["testRunId"]}", true, true).find("\\{.*\\}").count(props["testRunId"])}
 
 while((count = counter()) > 0){
-    logger.info "test run ${props["testRunId"]} has still ${count} suites running"
+    logger.info "test run ${props["testRunId"]} still has ${count} suites running"
     sleep TimeUnit.MINUTES.toMillis(1)
 }
 
