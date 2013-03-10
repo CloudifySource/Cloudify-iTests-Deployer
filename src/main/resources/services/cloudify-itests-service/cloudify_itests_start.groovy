@@ -37,6 +37,7 @@ def buildDir = "${serviceDir}/${config.test.BUILD_DIR}"
 
 def mvnExec = "${serviceDir}/maven/apache-maven-${config.maven.version}/bin/mvn"
 
+def suiteId = context.instanceId - 1
 def arguments = "test -e -X -U -P tgrid-cloudify-iTests " +
         "-Dsgtest.cloud.enabled=true " +
         "-DiTests.buildNumber=${config.test.BUILD_NUMBER} " +
@@ -46,7 +47,7 @@ def arguments = "test -e -X -U -P tgrid-cloudify-iTests " +
         "-Djava.security.policy=policy/policy.all " +
         "-Djava.awt.headless=true " +
         "-DiTests.suiteName=${config.test.SUITE_NAME} " +
-        "-DiTests.suiteId=${context.instanceId} " +
+        "-DiTests.suiteId=${suiteId} " +
         "-Dsgtest.summary.dir=${serviceDir}/${config.test.SUITE_NAME} " +
         "-DiTests.numOfSuites=${config.test.SUITE_NUMBER} " +
         "-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Jdk14Logger " +
@@ -78,7 +79,7 @@ try{
         // create container
         blobStore.createContainerInLocation(null, containerName)
         // add blob
-        reportName = "${config.test.SUITE_NAME}${context.instanceId}"
+        reportName = "${config.test.SUITE_NAME}${suiteId}"
         def reportFilePath = "${serviceDir}/${config.scm.projectName}/target/surefire-reports/${reportName}/${reportName}.xml"
         blob = blobStore.blobBuilder("${reportName}.xml")
                 .payload(new File(reportFilePath)).build()
