@@ -67,6 +67,7 @@ if (context.instanceId == 1){
   blobStore.deleteContainer(containerName)
 
   logger.info "running the tests reports merger"
+  buildDir = "${serviceDir}/${config.test.BUILD_DIR}"
   versionSplit = "${config.cloudify.version}".split("\\.")
   executeMaven(mvnExec,
     "exec:java -Dexec.mainClass=\"framework.testng.report.TestsReportMerger\" -Dexec.args=\"${config.test.SUITE_NAME} ${config.test.BUILD_NUMBER}"
