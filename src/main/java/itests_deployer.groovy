@@ -97,7 +97,7 @@ if (shouldBootstrap()){
     deployerPropertiesFile.withWriter {
         writer -> config.writeTo(writer)
     }
-    cloudify "install-service ${commandOptions} ${scriptDir}/../resources/services/mysql", false, true
+    cloudify "install-service ${commandOptions} ${scriptDir}/../resources/services/mysql"
 }
 logger.info "management is up"
 
