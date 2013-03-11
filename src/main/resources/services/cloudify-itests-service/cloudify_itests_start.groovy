@@ -17,13 +17,12 @@ import java.util.logging.Logger
 def executeMaven (mvnExec, String arguments, directory){
     new AntBuilder().exec(executable: mvnExec,
             failonerror:false,
-            dir:directory) {
+            dir:directory,
+            newEnvironment: true) {
         env(key:'JAVA_HOME',value:"${System.getProperty("user.home")}/java")
         arg(line: arguments)
     }
 }
-
-
 
 Logger logger = Logger.getLogger(this.getClass().getName())
 serviceDir = "${System.getProperty("user.home")}/cloudify-itests-service"
@@ -39,7 +38,7 @@ def mvnExec = "${serviceDir}/maven/apache-maven-${config.maven.version}/bin/mvn"
 
 def suiteId = context.instanceId - 1
 def arguments = "test -e -X -U -P tgrid-cloudify-iTests " +
-        "-Dsgtest.cloud.enabled=true " +
+        "-DiTests.cloud.enabled=true " +
         "-DiTests.buildNumber=${config.test.BUILD_NUMBER} " +
         "-Dcloudify.home=${buildDir} " +
         "-Dincludes=${config.test.INCLUDE} " +
@@ -79,9 +78,9 @@ try{
         // create container
         blobStore.createContainerInLocation(null, containerName)
         // add blob
-        reportName = "${config.test.SUITE_NAME}${suiteId}"
-        def reportFilePath = "${serviceDir}/${config.scm.projectName}/target/surefire-reports/${reportName}/${reportName}.xml"
-        blob = blobStore.blobBuilder("${reportName}.xml")
+        reportName = "sgtest-result-${config.test.SUITE_NAME}${suiteId}.xml"
+        def reportFilePath = "${serviceDir}/${config.test.SUITE_NAME}/${reportName}"
+        blob = blobStore.blobBuilder(reportName)
                 .payload(new File(reportFilePath)).build()
         blobStore.putBlob(containerName, blob)
     }

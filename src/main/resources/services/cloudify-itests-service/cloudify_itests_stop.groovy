@@ -40,13 +40,11 @@ if (context.instanceId == 1){
             .buildView(BlobStoreContext.class).getBlobStore()
 
     containerName = "${config.test.TEST_RUN_ID}".toLowerCase()
-    suiteId = context.instanceId - 1
-    reportName = "${config.test.SUITE_NAME}${suiteId}"
-    reportDirPath = "${serviceDir}/${config.scm.projectName}/target/surefire-reports/${reportName}"
+    reportDirPath = "${serviceDir}/${config.test.SUITE_NAME}"
 
     //Download from s3 bucket
     logger.info "downloading the report files"
-    blobStore.list(containerName).eachParallel {
+    blobStore.list(containerName).each {
         def outputFileName = "${reportDirPath}/${it.getName()}"
         logger.info "downloding file ${it.getName()} to ${outputFileName}"
         def input = blobStore.getBlob(containerName, it.getName()).getPayload().getInput()
