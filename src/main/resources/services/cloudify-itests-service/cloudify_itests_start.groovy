@@ -37,7 +37,7 @@ def buildDir = "${serviceDir}/${config.test.BUILD_DIR}"
 def mvnExec = "${serviceDir}/maven/apache-maven-${config.maven.version}/bin/mvn"
 
 def suiteId = context.instanceId - 1
-def arguments = "test -e -X -U -P tgrid-cloudify-iTests " +
+def arguments = "test -e -U -P tgrid-cloudify-iTests " +
         "-DiTests.cloud.enabled=true " +
         "-DiTests.buildNumber=${config.test.BUILD_NUMBER} " +
         "-Dcloudify.home=${buildDir} " +
