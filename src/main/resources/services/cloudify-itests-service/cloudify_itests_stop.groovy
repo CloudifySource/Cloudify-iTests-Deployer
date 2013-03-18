@@ -70,14 +70,14 @@ if (context.instanceId == 1){
     versionSplit = "${config.cloudify.version}".split("\\.")
     executeMaven(mvnExec,
             "exec:java -Dexec.mainClass=\"org.cloudifysource.quality.iTests.framework.testng.report.TestsReportMerger\" -Dexec.args=\"${config.test.SUITE_NAME}"
-                    + " ${reportDirPath} ${reportDirPath}\" -Dcloudify.home=${buildDir}",
+                    + " ${reportDirPath} ${reportDirPath}\" -Dcloudify.home=${buildDir} -Dcom.quality.sgtest.credentialsFolder=${context.getServiceDirectory()}/credentials",
             "${serviceDir}/${config.scm.projectName}")
 
     logger.info "running the wiki reporter"
     executeMaven(mvnExec,
             "exec:java -Dexec.mainClass=\"org.cloudifysource.quality.iTests.framework.testng.report.wiki.WikiReporter\" -Dexec.args=\"${reportDirPath} ${config.test.SUITE_TYPE} ${config.test.BUILD_NUMBER}"
                     + " ${versionSplit[0]} ${versionSplit[1]} \""
-                    + " -Dcloudify.home=${buildDir} -Dmysql.host=${config.test.MGT_MACHINE}",
+                    + " -Dcloudify.home=${buildDir} -Dmysql.host=${config.test.MGT_MACHINE} -Dcom.quality.sgtest.credentialsFolder=${context.getServiceDirectory()}/credentials",
             "${serviceDir}/${config.scm.projectName}")
 
 }
