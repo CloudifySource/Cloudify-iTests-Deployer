@@ -80,7 +80,7 @@ def slavePassword = args[3]
 def slaveHostIP = args[4]
 
 
-def grantStr = "GRANT REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO ${slaveUser}@'${slaveHostIP}' IDENTIFIED BY '${slavePassword}';"
+def grantStr = "GRANT REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO ${slaveUser}@'${slaveHostIP}';"
 def currQuery = "\"" + grantStr + "\""
 def currDebugMsg = "Invoking query: ${currQuery}"
 
