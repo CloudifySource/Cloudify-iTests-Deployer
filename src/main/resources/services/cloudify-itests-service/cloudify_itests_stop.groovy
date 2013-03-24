@@ -23,7 +23,8 @@ def executeMaven (mvnExec, String arguments, directory){
 context = ServiceContextFactory.getServiceContext()
 Logger logger = Logger.getLogger(this.getClass().getName())
 
-
+logger.info "instance ${context.instanceId} is shutting down the start script run"
+context.attributes.thisInstance[context.instanceId] = false
 
 //Only instance 1 does report and mergers
 if (context.instanceId == 1){

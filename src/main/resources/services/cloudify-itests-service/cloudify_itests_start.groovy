@@ -96,7 +96,8 @@ try{
 
         context.attributes.thisService.remove "${config.test.TEST_RUN_ID}-${context.instanceId}"
     }
-    while(true){
+    context.attributes.thisInstance[context.instanceId] = true
+    while(context.attributes.thisInstance[context.instanceId] == true){
         try{
             logger.info "waiting for uninstall"
             sleep TimeUnit.MINUTES.toMillis(5)
@@ -105,3 +106,5 @@ try{
         }
     }
 }
+
+System.exit 0
