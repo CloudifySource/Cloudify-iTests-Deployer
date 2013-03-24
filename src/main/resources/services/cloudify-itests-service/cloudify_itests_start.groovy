@@ -15,13 +15,16 @@ import java.util.logging.Logger
  */
 
 def executeMaven (mvnExec, String arguments, directory){
-    new AntBuilder().exec(executable: mvnExec,
-            failonerror:false,
-            dir:directory,
-            newEnvironment: true) {
+    def ant = new AntBuilder()
+    ant.exec(executable: mvnExec,
+            failonerror : false,
+            dir : directory,
+            newEnvironment : true,
+            resultProperty : 'result') {
         env(key:'JAVA_HOME',value:"${System.getProperty("user.home")}/java")
         arg(line: arguments)
     }
+    return ant.project.properties.'result' as int
 }
 
 Logger logger = Logger.getLogger(this.getClass().getName())
@@ -31,6 +34,7 @@ context = ServiceContextFactory.getServiceContext()
 
 logger.info "started running instance: ${context.instanceId} of ${config.test.TEST_RUN_ID}"
 
+def testRunResult = 0
 
 def buildDir = "${serviceDir}/${config.test.BUILD_DIR}"
 
@@ -60,33 +64,38 @@ def arguments = "test -e -U -P tgrid-cloudify-iTests " +
 
 try{
     logger.info "running ${mvnExec} in dir: ${serviceDir}/${config.scm.projectName} with arguments: ${arguments}"
-    executeMaven mvnExec, arguments, "${serviceDir}/${config.scm.projectName}"
+    testRunResult = executeMaven mvnExec, arguments, "${serviceDir}/${config.scm.projectName}"
 }finally{
-    logger.info "finished running the tests"
-    strorageProps = new Properties()
-    strorageProps.load new FileInputStream(new File("${context.getServiceDirectory()}/credentials/cloud/ec2/ec2-cred.properties"))
-    storageConfig = new ConfigSlurper().parse(strorageProps)
-    provider = 's3'
-    blobStore  = ContextBuilder.newBuilder(provider)
-            .credentials("${storageConfig.user}", "${storageConfig.apiKey}")
-            .buildView(BlobStoreContext.class).getBlobStore()
+    if (testRunResult != 0){
+        logger.severe "error while running the tests, exited with error: ${testRunResult}"
+        def testRunIdReverse = "${config.test.TEST_RUN_ID}".reverse()
+        context.attributes.thisService["failed-${testRunIdReverse}"]
+    } else {
+        logger.info "finished running the tests"
+        strorageProps = new Properties()
+        strorageProps.load new FileInputStream(new File("${context.getServiceDirectory()}/credentials/cloud/ec2/ec2-cred.properties"))
+        storageConfig = new ConfigSlurper().parse(strorageProps)
+        provider = 's3'
+        blobStore  = ContextBuilder.newBuilder(provider)
+                .credentials("${storageConfig.user}", "${storageConfig.apiKey}")
+                .buildView(BlobStoreContext.class).getBlobStore()
 
-    containerName = "${config.test.TEST_RUN_ID}".toLowerCase()
-    //Instance 1 does merger so no need to upload
-    if (context.instanceId != 1){
-        logger.info "uploading the report file to ${provider}"
-        // create container
-        blobStore.createContainerInLocation(null, containerName)
-        // add blob
-        reportName = "sgtest-result-${config.test.SUITE_NAME}${suiteId}.xml"
-        def reportFilePath = "${serviceDir}/${config.test.SUITE_NAME}/${reportName}"
-        blob = blobStore.blobBuilder(reportName)
-                .payload(new File(reportFilePath)).build()
-        blobStore.putBlob(containerName, blob)
+        containerName = "${config.test.TEST_RUN_ID}".toLowerCase()
+        //Instance 1 does merger so no need to upload
+        if (context.instanceId != 1){
+            logger.info "uploading the report file to ${provider}"
+            // create container
+            blobStore.createContainerInLocation(null, containerName)
+            // add blob
+            reportName = "sgtest-result-${config.test.SUITE_NAME}${suiteId}.xml"
+            def reportFilePath = "${serviceDir}/${config.test.SUITE_NAME}/${reportName}"
+            blob = blobStore.blobBuilder(reportName)
+                    .payload(new File(reportFilePath)).build()
+            blobStore.putBlob(containerName, blob)
+        }
+
+        context.attributes.thisService.remove "${config.test.TEST_RUN_ID}-${context.instanceId}"
     }
-
-    context.attributes.thisService.remove "${config.test.TEST_RUN_ID}-${context.instanceId}"
-
     while(true){
         try{
             logger.info "waiting for uninstall"

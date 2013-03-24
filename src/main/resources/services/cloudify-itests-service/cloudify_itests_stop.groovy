@@ -8,12 +8,15 @@ import org.jclouds.blobstore.BlobStoreContext
 import java.util.logging.Logger
 
 def executeMaven (mvnExec, String arguments, directory){
-    new AntBuilder().exec(executable: mvnExec,
+
+    def ant = new AntBuilder().exec(executable: mvnExec,
             failonerror:false,
-            dir:directory) {
+            dir:directory,
+            resultProperty: 'result') {
         env(key:'JAVA_HOME',value:"${System.getProperty("user.home")}/java")
         arg(line: arguments)
     }
+    return ant.properties.'result'
 }
 
 
