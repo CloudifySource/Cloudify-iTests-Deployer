@@ -1,4 +1,3 @@
-import org.apache.tools.ant.DefaultLogger
 import java.util.concurrent.TimeUnit
 import java.util.logging.Logger
 
