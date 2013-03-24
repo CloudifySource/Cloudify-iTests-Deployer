@@ -9,11 +9,11 @@ import java.util.logging.Logger
  */
 
 //variable definitions
-def Logger logger = Logger.getLogger(this.getClass().getName())
-def scriptDir = new File(getClass().protectionDomain.codeSource.location.path).parent
-def commandOptions="--verbose -timeout 15"
-def deployerPropertiesFile = new File("${scriptDir}/deployer.properties")
-def config= new ConfigSlurper().parse(deployerPropertiesFile.text)
+Logger logger = Logger.getLogger(this.getClass().getName())
+scriptDir = new File(getClass().protectionDomain.codeSource.location.path).parent
+commandOptions = "--verbose -timeout 15"
+deployerPropertiesFile = new File("${scriptDir}/deployer.properties")
+config = new ConfigSlurper().parse(deployerPropertiesFile.text)
 def props = [:] as Map<String, String>
 def i = 0
 
