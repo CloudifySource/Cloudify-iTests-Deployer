@@ -101,7 +101,7 @@ logger.info "checking if management machine is up"
 if (shouldBootstrap()){
     logger.info "management is down and should be bootstrapped"
     def bootstrapResults = cloudify("bootstrap-cloud ${commandOptions} ec2", false)
-    if (bootstrapResults['result'] != 0){
+    if (bootstrapResults['result'] as int != 0){
         exitOnError "bootstrap failed, finishing run", bootstrapResults['output'], bootstrapResults['result']
     }
     config.MGT_MACHINE = bootstrapResults['output'].find("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}")
@@ -110,10 +110,10 @@ if (shouldBootstrap()){
         writer -> config.writeTo(writer)
     }
     def installSQLResults = cloudify "install-service ${commandOptions} ${scriptDir}/../resources/services/mysql"
-    if (installSQLResults['result'] != 0){
+    if (installSQLResults['result'] as int  != 0){
         logger.severe "bootstrap failed, finishing run"
         def teardownResults = cloudify "teardown-cloud ${commandOptions} ec2"
-        if (teardownResults['result'] != 0){
+        if (teardownResults['result'] as int  != 0){
             //TODO send mail
             exitOnError "bootstrap failed, finishing run", teardownResults['output'], teardownResults['result']
             System.exit teardownResults['result'] as int
@@ -143,7 +143,7 @@ replaceTextInFile serviceFilePath, ["<name>" : props["testRunId"], "<numInstance
 
 logger.info "install service"
 def installServiceResults = cloudify "install-service ${commandOptions} ${scriptDir}/${props['testRunId']}"
-if (installServiceResults['result'] != 0){
+if (installServiceResults['result'] as int != 0){
     exitOnError "installing iTests service failed, finishing run", installServiceResults['output'], installServiceResults['result']
 }
 
@@ -163,7 +163,7 @@ while((count = counter(props['testRunId'])) > 0){
 
 logger.info "uninstall service"
 def uninstallResults = cloudify "uninstall-service ${commandOptions} ${props['testRunId']}"
-if (uninstallResults['result'] != 0){
+if (uninstallResults['result'] as int != 0){
     //send mail
     exitOnError "uninstalling the iTests service failed, finishing run", uninstallResults['output'], uninstallResults['result']
 }
