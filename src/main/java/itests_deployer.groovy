@@ -42,7 +42,7 @@ def cloudify(arguments, shouldConnect){
             arguments = "connect ${config.MGT_MACHINE};" + arguments
         }
         exec(executable: "./cloudify.sh",
-                failonerror:true,
+                failonerror:false,
                 dir:"${config.CLOUDIFY_HOME}/bin",
                 outputProperty: 'output',
                 resultProperty: 'result'
