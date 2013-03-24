@@ -67,8 +67,12 @@ def exitOnError(msg, output, errorCode) {
     System.exit errorCode as int
 }
 
+def getServiceAttributes(){
+    return cloudify("list-attributes -scope service:${props["testRunId"]}")['output']
+}
+
 def counter(toCount) {
-    return cloudify("list-attributes -scope service:${props["testRunId"]}")['output'].find("\\{.*\\}").count(toCount)
+    return getServiceAttributes().find("\\{.*\\}").count(toCount)
 }
 
 
@@ -151,7 +155,7 @@ def testRunIdReverse = "${props['testRunId']}".reverse()
 int count
 while((count = counter(props['testRunId'])) > 0){
     if (counter("failed-${testRunIdReverse}") != 0){
-        logger.severe "test run failed, uninstalling service ${props['testRunId']}"
+        logger.severe "test run failed in service instance with id(s) ${getServiceAttributes().grep("failed-${testRunIdReverse}")}, uninstalling service ${props['testRunId']}"
         break
     }
     logger.info "test run ${props["testRunId"]} still has ${count} suites running"

@@ -69,7 +69,7 @@ try{
     if (testRunResult != 0){
         logger.severe "error while running the tests, exited with error: ${testRunResult}"
         def testRunIdReverse = "${config.test.TEST_RUN_ID}".reverse()
-        context.attributes.thisService["failed-${testRunIdReverse}"]
+        context.attributes.thisService["failed-${testRunIdReverse}"] = context.instanceId
     } else {
         logger.info "finished running the tests"
         strorageProps = new Properties()
