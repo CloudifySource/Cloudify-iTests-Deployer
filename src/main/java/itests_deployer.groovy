@@ -109,7 +109,7 @@ if (shouldBootstrap()){
     deployerPropertiesFile.withWriter {
         writer -> config.writeTo(writer)
     }
-    logger.info "management machine was bootstrapped successfully on ${config.MGT_MACHINE}"
+    logger.info "management machine was bootstrapped successfully"
     logger.info "installing mysql service on the management machine..."
     def installSQLResults = cloudify "install-service ${commandOptions} ${scriptDir}/../resources/services/mysql"
     if (installSQLResults['result'] as int  != 0){
@@ -126,7 +126,7 @@ if (shouldBootstrap()){
     //logger.info "importing existing dashboard DB to management machine..."
     //"ssh tgrid@pc-lab24 'mysqldump dashboard SgtestResult | ssh -i ${config.PEM_FILE} -o StrictHostKeyChecking=no ec2-user@${config.MGT_MACHINE} mysql dashboard'".execute().waitFor()
 }
-logger.info "management is up"
+logger.info "management is up web-ui is available at http://${config.MGT_MACHINE}:8099"
 
 
 
