@@ -57,7 +57,7 @@ def cloudify(arguments){
 }
 
 def shouldBootstrap(){
-    return cloudify("")['result'] != 0
+    return cloudify("")['result'] as int != 0
 }
 
 def exitOnError(msg, output, errorCode) {
