@@ -164,12 +164,13 @@ while((count = counter(props['testRunId'])) > 0){
     sleep TimeUnit.MINUTES.toMillis(1)
 }
 
-logger.info "uninstall service"
+logger.info "uninstalling iTests service..."
 def uninstallResults = cloudify "uninstall-service ${commandOptions} ${props['testRunId']}"
 if (uninstallResults['result'] as int != 0){
     //send mail
     exitOnError "uninstalling the iTests service failed, finishing run", uninstallResults['output'], uninstallResults['result']
 }
+logger.info "uninstalled iTest service successfully"
 
 logger.info "removing ${props['testRunId']} service dir"
 new File(props["testRunId"]).deleteDir()
