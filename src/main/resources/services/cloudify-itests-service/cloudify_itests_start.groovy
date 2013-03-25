@@ -100,7 +100,7 @@ try{
     while(context.attributes.thisInstance["${context.instanceId}"] == true){
         try{
             logger.info "waiting for uninstall"
-            sleep TimeUnit.MINUTES.toMillis(5)
+            sleep TimeUnit.MINUTES.toMillis(1)
         }catch(Exception ignored){
             break
         }
