@@ -27,7 +27,7 @@ def executeMaven (mvnExec, String arguments, directory){
     return ant.project.properties.'result' as int
 }
 
-Logger logger = Logger.getLogger(this.getClass().getName())
+logger = Logger.getLogger(this.getClass().getName())
 serviceDir = "${System.getProperty("user.home")}/cloudify-itests-service"
 config = new ConfigSlurper().parse(new File("cloudify-itests.properties").text)
 context = ServiceContextFactory.getServiceContext()

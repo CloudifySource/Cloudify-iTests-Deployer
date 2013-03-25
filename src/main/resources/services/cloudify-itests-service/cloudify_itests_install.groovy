@@ -40,7 +40,7 @@ def pool = Executors.newCachedThreadPool()
 results = pool.invokeAll([
         { install("${serviceDir}/${config.cloudify.installDir}", config.cloudify.downloadPath, config.cloudify.zipName)
             chmod("${serviceDir}/${config.test.BUILD_DIR}/bin")
-            chmod("${serviceDir}/${config.test.BUILD_DIR}/lib") 
+            chmod("${serviceDir}/${config.test.BUILD_DIR}/lib")
             chmod("${serviceDir}/${config.test.BUILD_DIR}/tools") },
         { install("${serviceDir}/${config.maven.installDir}", config.maven.downloadPath, config.maven.zipName)
             chmod("${serviceDir}/maven/apache-maven-${config.maven.version}/bin") },
@@ -81,13 +81,13 @@ results = pool.invokeAll([
                         }
                     }
                     break
-                    
+
                 case "zip":
                     install("${serviceDir}", "https://github.com/CloudifySource/Cloudify-iTests/archive/${branchName}.zip", "Cloudify-iTests-${branchName}.zip")
                     new AntBuilder().move(todir : "${serviceDir}/${config.scm.projectName}"){
                         fileset(dir : "${serviceDir}/Cloudify-iTests-${branchName}")
                     }
-                    
+
             }
         }])
 try{
@@ -95,6 +95,13 @@ try{
     results.each { it.get(15, TimeUnit.MINUTES) }
     context.attributes.thisService["${config.test.TEST_RUN_ID}-${context.getInstanceId()}"] = new Date().format 'dd/MM/yyyy-hh:mm:ss'
 
+} catch (Exception e){
+
+    def testRunIdReverse = "${config.test.TEST_RUN_ID}".reverse()
+    context.attributes.thisService["failed-${testRunIdReverse}"] = context.instanceId
+
 } finally {
+
     pool.shutdownNow()
+
 }

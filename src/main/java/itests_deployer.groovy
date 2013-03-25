@@ -13,7 +13,7 @@ scriptDir = new File(getClass().protectionDomain.codeSource.location.path).paren
 commandOptions = "--verbose -timeout 15"
 deployerPropertiesFile = new File("${scriptDir}/deployer.properties")
 config = new ConfigSlurper().parse(deployerPropertiesFile.text)
-def props = [:] as Map<String, String>
+props = [:] as Map<String, String>
 def i = 0
 
 
@@ -99,7 +99,7 @@ logger.info "strating itests suite with id: ${props["testRunId"]}"
 
 logger.info "checking if management machine is up"
 if (shouldBootstrap()){
-    logger.info "management is down and should be bootstrapped"
+    logger.info "management is down and should be bootstrapped..."
     def bootstrapResults = cloudify("bootstrap-cloud ${commandOptions} ec2", false)
     if (bootstrapResults['result'] as int != 0){
         exitOnError "bootstrap failed, finishing run", bootstrapResults['output'], bootstrapResults['result']
@@ -109,6 +109,8 @@ if (shouldBootstrap()){
     deployerPropertiesFile.withWriter {
         writer -> config.writeTo(writer)
     }
+    logger.info "management machine was bootstrapped successfully on ${config.MGT_MACHINE}"
+    logger.info "installing mysql service on the management machine..."
     def installSQLResults = cloudify "install-service ${commandOptions} ${scriptDir}/../resources/services/mysql"
     if (installSQLResults['result'] as int  != 0){
         logger.severe "bootstrap failed, finishing run"
@@ -120,7 +122,8 @@ if (shouldBootstrap()){
         }
         exitOnError "installing mysql service failed, teared down ec2 and finishing run", installSQLResults['output'], installSQLResults['result']
     }
-    logger.info "importing existing dashboard DB to management machine..."
+    logger.info "mysql service was successfully installed on the management machine"
+    //logger.info "importing existing dashboard DB to management machine..."
     //"ssh tgrid@pc-lab24 'mysqldump dashboard SgtestResult | ssh -i ${config.PEM_FILE} -o StrictHostKeyChecking=no ec2-user@${config.MGT_MACHINE} mysql dashboard'".execute().waitFor()
 }
 logger.info "management is up"
