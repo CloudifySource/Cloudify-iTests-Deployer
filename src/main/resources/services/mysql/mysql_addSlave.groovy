@@ -80,7 +80,7 @@ def slavePassword = args[3]
 def slaveHostIP = args[4]
 
 
-def grantStr = "GRANT REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO ${slaveUser}@'${slaveHostIP}';"
+def grantStr = "GRANT REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO ${slaveUser}@'${slaveHostIP}' IDENTIFIED BY '${slavePassword}';"
 def currQuery = "\"" + grantStr + "\""
 def currDebugMsg = "Invoking query: ${currQuery}"
 
@@ -89,4 +89,3 @@ runMysqlQuery(binFolder,osConfig.mysqlProgram,currOsName,currQuery as String,cur
 							
 println "mysql_addSlave.groovy: End"
 	
-
