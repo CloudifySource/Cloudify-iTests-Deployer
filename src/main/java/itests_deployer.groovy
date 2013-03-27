@@ -93,8 +93,8 @@ props['<sgtest.jdk>'] = args[i++]                  //14
 props['<sgtest.jvm.settings>'] = args[i++]         //15
 props['<s3_cloudify_publish_folder>'] = args[i]    //16
 props['testRunId'] = "${props["<suite.name>"]}-${new Date().format 'dd-MM-yyyy-HH-mm-ss' }"
-props['<mysql.user>'] = config.mysql.user as String
-props['<mysql.pass>'] = config.mysql.pass as String
+props['<mysql.user>'] = config.MYSQL_USER as String
+props['<mysql.pass>'] = config.MYSQL_PASS as String
 
 logger.info "strating itests suite with id: ${props["testRunId"]}"
 
@@ -125,8 +125,8 @@ if (shouldBootstrap()){
     }
     logger.info "mysql service was successfully installed on the management machine"
 
-    logger.info "importing existing dashboard DB to management machine..."
-    "ssh tgrid@pc-lab24 'mysqldump dashboard SgtestResult | ssh -i ${config.PEM_FILE} -o StrictHostKeyChecking=no ec2-user@${config.MGT_MACHINE} mysql dashboard'".execute().waitFor()
+    //logger.info "importing existing dashboard DB to management machine..."
+    //"ssh tgrid@pc-lab24 'mysqldump -u sa dashboard SgtestResult | ssh -i ${config.PEM_FILE} -o StrictHostKeyChecking=no ec2-user@${config.MGT_MACHINE} mysql -u ${config.MYSQL_USER} -p ${config.MYSQL_PASS} dashboard'".execute().waitFor()
 }
 
 testingBuildVersion = "${config.CLOUDIFY_HOME}/bin/platform-info.sh".execute()
