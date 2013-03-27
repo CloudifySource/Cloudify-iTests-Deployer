@@ -123,8 +123,9 @@ if (shouldBootstrap()){
         exitOnError "installing mysql service failed, teared down ec2 and finishing run", installSQLResults['output'], installSQLResults['result']
     }
     logger.info "mysql service was successfully installed on the management machine"
-    //logger.info "importing existing dashboard DB to management machine..."
-    //"ssh tgrid@pc-lab24 'mysqldump dashboard SgtestResult | ssh -i ${config.PEM_FILE} -o StrictHostKeyChecking=no ec2-user@${config.MGT_MACHINE} mysql dashboard'".execute().waitFor()
+
+    logger.info "importing existing dashboard DB to management machine..."
+    "ssh tgrid@pc-lab24 'mysqldump dashboard SgtestResult | ssh -i ${config.PEM_FILE} -o StrictHostKeyChecking=no ec2-user@${config.MGT_MACHINE} mysql dashboard'".execute().waitFor()
 }
 logger.info "management is up, web-ui is available at http://${config.MGT_MACHINE}:8099"
 
@@ -145,7 +146,7 @@ def serviceFilePath = "${props["testRunId"]}/cloudify-itests-service.groovy"
 replaceTextInFile serviceFilePath, ["<name>" : props["testRunId"], "<numInstances>" : props["<suite.number>"]]
 
 logger.info "install service"
-def installServiceResults = cloudify "install-service ${commandOptions} ${scriptDir}/${props['testRunId']}"
+def installServiceResults = cloudify "install-service -disableSelfHealing ${commandOptions} ${scriptDir}/${props['testRunId']}"
 if (installServiceResults['result'] as int != 0){
     exitOnError "installing iTests service failed, finishing run", installServiceResults['output'], installServiceResults['result']
 }
