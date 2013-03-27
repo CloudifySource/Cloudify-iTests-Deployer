@@ -132,11 +132,11 @@ if (shouldBootstrap()){
 testingBuildVersion = "${config.CLOUDIFY_HOME}/bin/platform-info.sh".execute()
 
 logger.info """management is up
-## the tester build is: ${testingBuildVersion.text.trim()}
-## the tested build is: GigaSpaces Cloudify ${props['<version>']} ${props['<milestone>'].toUpperCase()} (build ${props['<buildNumber>']})
-## web-ui is available at http://${config.MGT_MACHINE}:8099
-## rest is available at http://${config.MGT_MACHINE}:8100
-## test suite is: ${props['<suite.name>']}, split into ${props['<suite.number>']} parts
+>>> the tester build is: ${testingBuildVersion.text.trim()}
+>>> the tested build is: GigaSpaces Cloudify ${props['<version>']} ${props['<milestone>'].toUpperCase()} (build ${props['<buildNumber>']})
+>>> web-ui is available at http://${config.MGT_MACHINE}:8099
+>>> rest is available at http://${config.MGT_MACHINE}:8100
+>>> test suite is: ${props['<suite.name>']}, split into ${props['<suite.number>']} parts
 """
 
 
