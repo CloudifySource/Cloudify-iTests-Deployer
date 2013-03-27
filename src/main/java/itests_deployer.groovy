@@ -75,25 +75,26 @@ def counter(toCount) {
 }
 
 
-props["<buildNumber>"] = args[i++]         //0
-props["<version>"] = args[i++]             //1
-props["<milestone>"] = args[i++]           //2
-props["<suite.number>"] = args[i++]        //3
-props["<suite.name>"] = args[i++]          //4
-props["<suite.type>"] = args[i++]          //5
-props["<include>"] = args[i++]             //6
-props["<exclude>"] = args[i++]             //7
-props["<ec2.region>"] = args[i++]          //8
-props["<supported.clouds>"] = args[i++]    //9
-props["<byon.machines>"] = args[i++]       //10
-props["<branch.name>"] = args[i++]         //11
-props["<package.name>"] = args[i++]        //12
-props["<xap.jdk>"] = args[i++]             //13
-props["<sgtest.jdk>"] = args[i++]          //14
-props["<sgtest.jvm.settings>"] = args[i]   //15
-props["<milestoneUpperCase>"] = "SNAPSHOT" //props["<milestone>"].toUpperCase()
-props["testRunId"] = "${props["<suite.name>"]}-${new Date().format 'dd-MM-yyyy-HH-mm-ss' }"
-
+props['<buildNumber>'] = args[i++]                 //0
+props['<version>'] = args[i++]                     //1
+props['<milestone>'] = args[i++]                   //2
+props['<suite.number>'] = args[i++]                //3
+props['<suite.name>'] = args[i++]                  //4
+props['<suite.type>'] = args[i++]                  //5
+props['<include>'] = args[i++]                     //6
+props['<exclude>'] = args[i++]                     //7
+props['<ec2.region>'] = args[i++]                  //8
+props['<supported.clouds>'] = args[i++]            //9
+props['<byon.machines>'] = args[i++]               //10
+props['<branch.name>'] = args[i++]                 //11
+props['<package.name>'] = args[i++]                //12
+props['<xap.jdk>'] = args[i++]                     //13
+props['<sgtest.jdk>'] = args[i++]                  //14
+props['<sgtest.jvm.settings>'] = args[i++]         //15
+props['<s3_cloudify_publish_folder>'] = args[i]    //16
+props['testRunId'] = "${props["<suite.name>"]}-${new Date().format 'dd-MM-yyyy-HH-mm-ss' }"
+props['<mysql.user>'] = config.mysql.user as String
+props['<mysql.pass>'] = config.mysql.pass as String
 
 logger.info "strating itests suite with id: ${props["testRunId"]}"
 
@@ -127,7 +128,16 @@ if (shouldBootstrap()){
     logger.info "importing existing dashboard DB to management machine..."
     "ssh tgrid@pc-lab24 'mysqldump dashboard SgtestResult | ssh -i ${config.PEM_FILE} -o StrictHostKeyChecking=no ec2-user@${config.MGT_MACHINE} mysql dashboard'".execute().waitFor()
 }
-logger.info "management is up, web-ui is available at http://${config.MGT_MACHINE}:8099"
+
+testingBuildVersion = "${config.CLOUDIFY_HOME}/bin/platform-info.sh".execute()
+
+logger.info """management is up
+## the testing build is: ${testingBuildVersion.text}
+## the tested build is: GigaSpaces Cloudify ${props['<version>']} ${props['<milestone>'].toUpperCase()} (build ${props['<buildNumber>']})
+## web-ui is available at http://${config.MGT_MACHINE}:8099
+## rest is available at http://${config.MGT_MACHINE}:8100
+## test suite is: ${props['<suite.name>']}, split into ${props['<suite.number>']} parts
+"""
 
 
 
