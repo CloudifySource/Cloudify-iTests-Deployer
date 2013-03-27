@@ -10,3 +10,4 @@
 .project
 .idea/**
 *.iml
+*.groovy~
