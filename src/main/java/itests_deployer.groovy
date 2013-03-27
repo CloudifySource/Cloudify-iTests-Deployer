@@ -126,7 +126,7 @@ if (shouldBootstrap()){
     //logger.info "importing existing dashboard DB to management machine..."
     //"ssh tgrid@pc-lab24 'mysqldump dashboard SgtestResult | ssh -i ${config.PEM_FILE} -o StrictHostKeyChecking=no ec2-user@${config.MGT_MACHINE} mysql dashboard'".execute().waitFor()
 }
-logger.info "management is up web-ui is available at http://${config.MGT_MACHINE}:8099"
+logger.info "management is up, web-ui is available at http://${config.MGT_MACHINE}:8099"
 
 
 

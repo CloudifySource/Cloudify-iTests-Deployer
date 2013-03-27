@@ -93,18 +93,7 @@ try{
                     .payload(new File(reportFilePath)).build()
             blobStore.putBlob(containerName, blob)
         }
-
         context.attributes.thisService.remove "${config.test.TEST_RUN_ID}-${context.instanceId}"
-    }
-    context.attributes.thisInstance["${context.instanceId}"] = true
-    while(context.attributes.thisInstance["${context.instanceId}"] == true){
-        try{
-            logger.info "waiting for uninstall"
-            sleep TimeUnit.MINUTES.toMillis(1)
-        }catch(Exception ignored){
-            break
-        }
     }
 }
 
-System.exit 0
