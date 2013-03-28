@@ -35,7 +35,9 @@ if (context.instanceId == 1){
     def mvnExec = "${serviceDir}/maven/apache-maven-${config.maven.version}/bin/mvn"
 
     strorageProps = new Properties()
-    strorageProps.load new FileInputStream(new File("${context.getServiceDirectory()}/credentials/cloud/ec2/ec2-cred.properties"))
+    storagePropsStream = new FileInputStream(new File("${context.getServiceDirectory()}/credentials/cloud/ec2/ec2-cred.properties"))
+    strorageProps.load storagePropsStream
+    storagePropsStream.close()
     storageConfig = new ConfigSlurper().parse(strorageProps)
     provider = 's3'
     blobStore  = ContextBuilder.newBuilder(provider)
