@@ -136,9 +136,9 @@ if (shouldBootstrap()){
     teardownIfManagementServiceInstallFails(installTomcatResults)
     logger.info "tomcat service was successfully installed on the management machine"
 
-    def deployDashboardResults = cloudify "invoke tomcat updateWar http://maven-repository.openspaces.org/com/gigaspaces/quality/dashboard/dashboard.war"
+    /*def deployDashboardResults = cloudify "invoke tomcat updateWar "
     teardownIfManagementServiceInstallFails(deployDashboardResults)
-    logger.info "dashboard was successfully deployed"
+    logger.info "dashboard was successfully deployed"*/
 }
 
 

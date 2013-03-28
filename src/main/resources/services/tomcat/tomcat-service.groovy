@@ -31,10 +31,15 @@ service {
 	def currJmxPort = jmxPort + portIncrement
 	def currHttpPort = port + portIncrement
 	def currAjpPort = ajpPort + portIncrement
-		
-	compute {
-		template "SMALL_LINUX"
-	}
+
+    compute {
+        template "MANAGEMENT_LINUX"
+    }
+    isolationSLA {
+        global {
+            useManagement true
+        }
+    }
 
 	lifecycle {
 	
