@@ -137,6 +137,7 @@ logger.info """management is up
 >>> web-ui is available at http://${config.MGT_MACHINE}:8099
 >>> rest is available at http://${config.MGT_MACHINE}:8100
 >>> test suite is: ${props['<suite.name>']}, split into ${props['<suite.number>']} parts
+>>> test suite id is: ${props["testRunId"]}
 """
 
 
