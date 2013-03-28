@@ -88,3 +88,5 @@ if (context.instanceId == 1){
 else{
     logger.info "service instance: ${context.instanceId} - nothing to do on stop"
 }
+
+System.exit 0
