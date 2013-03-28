@@ -42,7 +42,7 @@ def cloudify(arguments, shouldConnect){
         }
         exec(executable: "./cloudify.sh",
                 failonerror:false,
-                dir:"${config.CLOUDIFY_HOME}/bin",
+                dir:"${config.CLOUDIFY_HOME}/tools/cli",
                 outputProperty: 'output',
                 resultProperty: 'result'
                 ) {
@@ -72,6 +72,19 @@ def getServiceAttributes(){
 
 def counter(toCount) {
     return getServiceAttributes().find("\\{.*\\}").count(toCount)
+}
+
+def teardownIfManagementServiceInstallFails(Hashtable installServiceResults) {
+    if (installServiceResults['result'] as int != 0) {
+        logger.severe "isntall manegement service failed, finishing run"
+        def teardownResults = cloudify "teardown-cloud ${commandOptions} ec2"
+        if (teardownResults['result'] as int != 0) {
+            //TODO send mail
+            exitOnError "teardown failed, finishing run", teardownResults['output'], teardownResults['result']
+            System.exit teardownResults['result'] as int
+        }
+        exitOnError "installing service failed, teared down ec2 and finished run", installServiceResults['output'], installServiceResults['result']
+    }
 }
 
 
@@ -113,21 +126,21 @@ if (shouldBootstrap()){
     logger.info "management machine was bootstrapped successfully"
     logger.info "installing mysql service on the management machine..."
     def installSQLResults = cloudify "install-service ${commandOptions} ${scriptDir}/../resources/services/mysql"
-    if (installSQLResults['result'] as int  != 0){
-        logger.severe "bootstrap failed, finishing run"
-        def teardownResults = cloudify "teardown-cloud ${commandOptions} ec2"
-        if (teardownResults['result'] as int  != 0){
-            //TODO send mail
-            exitOnError "bootstrap failed, finishing run", teardownResults['output'], teardownResults['result']
-            System.exit teardownResults['result'] as int
-        }
-        exitOnError "installing mysql service failed, teared down ec2 and finishing run", installSQLResults['output'], installSQLResults['result']
-    }
+    teardownIfManagementServiceInstallFails(installSQLResults)
     logger.info "mysql service was successfully installed on the management machine"
 
     //logger.info "importing existing dashboard DB to management machine..."
     //"ssh tgrid@pc-lab24 'mysqldump -u sa dashboard SgtestResult | ssh -i ${config.PEM_FILE} -o StrictHostKeyChecking=no ec2-user@${config.MGT_MACHINE} mysql -u ${config.MYSQL_USER} -p ${config.MYSQL_PASS} dashboard'".execute().waitFor()
+
+    def installTomcatResults = cloudify "install-service ${commandOptions} ${scriptDir}/../resources/services/tomcat"
+    teardownIfManagementServiceInstallFails(installTomcatResults)
+    logger.info "tomcat service was successfully installed on the management machine"
+
+    def deployDashboardResults = cloudify "invoke tomcat updateWar http://maven-repository.openspaces.org/com/gigaspaces/quality/dashboard/dashboard.war"
+    teardownIfManagementServiceInstallFails(deployDashboardResults)
+    logger.info "dashboard was successfully deployed"
 }
+
 
 testingBuildVersion = "${config.CLOUDIFY_HOME}/bin/platform-info.sh".execute()
 
@@ -136,6 +149,7 @@ logger.info """management is up
 >>> the tested build is: GigaSpaces Cloudify ${props['<version>']} ${props['<milestone>'].toUpperCase()} (build ${props['<buildNumber>']})
 >>> web-ui is available at http://${config.MGT_MACHINE}:8099
 >>> rest is available at http://${config.MGT_MACHINE}:8100
+>>> dashboard is available at: http://${config.MGT_MACHINE}:8080/dashboard
 >>> test suite is: ${props['<suite.name>']}, split into ${props['<suite.number>']} parts
 >>> test suite id is: ${props["testRunId"]}
 """
@@ -157,7 +171,7 @@ def serviceFilePath = "${props["testRunId"]}/cloudify-itests-service.groovy"
 replaceTextInFile serviceFilePath, ["<name>" : props["testRunId"], "<numInstances>" : props["<suite.number>"]]
 
 logger.info "install service"
-def installServiceResults = cloudify "install-service -disableSelfHealing ${commandOptions} ${scriptDir}/${props['testRunId']}"
+def installServiceResults = cloudify "install-service ${commandOptions} ${scriptDir}/${props['testRunId']}"
 if (installServiceResults['result'] as int != 0){
     exitOnError "installing iTests service failed, finishing run", installServiceResults['output'], installServiceResults['result']
 }
