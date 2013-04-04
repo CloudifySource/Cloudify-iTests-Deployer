@@ -74,9 +74,9 @@ def counter(toCount) {
     return getServiceAttributes().find("\\{.*\\}").count(toCount)
 }
 
-def teardownIfManagementServiceInstallFails(Hashtable installServiceResults) {
+def teardownIfManagementInstallFails(Hashtable installServiceResults) {
     if (installServiceResults['result'] as int != 0) {
-        logger.severe "install management service failed, finishing run"
+        logger.severe "install management failed, finishing run"
         def teardownResults = cloudify "teardown-cloud ${commandOptions} ec2"
         if (teardownResults['result'] as int != 0) {
             //TODO send mail
@@ -135,22 +135,14 @@ if (shouldBootstrap()){
 
 
 
-    logger.info "installing mysql service on the management machine..."
-    def installSQLResults = cloudify "install-service ${commandOptions} ${scriptDir}/../resources/services/mysql"
-    teardownIfManagementServiceInstallFails(installSQLResults)
-    logger.info "mysql service was successfully installed on the management machine"
+    logger.info "installing iTests-Management application on the management machine..."
+    def installResults = cloudify "install-application ${commandOptions} ${scriptDir}/../resources/services/iTests-Management"
+    teardownIfManagementInstallFails(installResults)
+    logger.info "iTests-Management application was successfully installed on the management machine"
 
     //logger.info "importing existing dashboard DB to management machine..."
     //"ssh tgrid@pc-lab24 'mysqldump -u sa dashboard SgtestResult | ssh -i ${config.PEM_FILE} -o StrictHostKeyChecking=no ec2-user@${config.MGT_MACHINE} mysql -u ${config.MYSQL_USER} -p ${config.MYSQL_PASS} dashboard'".execute().waitFor()
 
-    logger.info "installing tomcat service on the management machine..."
-    def installTomcatResults = cloudify "install-service ${commandOptions} ${scriptDir}/../resources/services/tomcat"
-    teardownIfManagementServiceInstallFails(installTomcatResults)
-    logger.info "tomcat service was successfully installed on the management machine"
-
-    /*def deployDashboardResults = cloudify "invoke tomcat updateWar "
-    teardownIfManagementServiceInstallFails(deployDashboardResults)
-    logger.info "dashboard was successfully deployed"*/
 }
 
 
