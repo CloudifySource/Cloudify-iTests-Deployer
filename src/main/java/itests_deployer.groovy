@@ -128,10 +128,10 @@ if (shouldBootstrap()){
 
     logger.info "inject mysql username and password"
     replaceTextInFile "${scriptDir}/../resources/services/mysql/mysql-service.properties",
-            ["^dbUser.*\$":"dbUser='${config.MYSQL_USER}'", "^dbPassW.*\$" : "dbPassW='${config.MYSQL_PASS}'"]
+            ['dbUser.*\n' : "dbUser='${config.MYSQL_USER}'\n", 'dbPassW.*\n' : "dbPassW='${config.MYSQL_PASS}'\n"]
 
     replaceTextInFile "${scriptDir}/../resources/services/tomcat/tomcat-service.properties",
-            ["^javaOpts.*\$":"javaOpts='-Dmysql.user=${config.MYSQL_USER} -Dmysql.pass=${config.MYSQL_PASS}'"]
+            ['javaOpts.*\n' : "javaOpts='-Dmysql.user=${config.MYSQL_USER} -Dmysql.pass=${config.MYSQL_PASS}'\n"]
 
 
 
