@@ -60,7 +60,7 @@ def arguments = "test -e -U -P tgrid-cloudify-iTests " +
         "-Dec2.region=${config.test.EC2_REGION} " +
         "-DipList=${config.test.BYON_MACHINES} " +
         "-Dsupported-clouds=${config.test.SUPPORTED_CLOUDS} " +
-        "-Dcom.quality.sgtest.credentialsFolder=${context.getServiceDirectory()}/credentials"
+        "-DiTests.credentialsFolder=${context.getServiceDirectory()}/credentials"
 
 try{
     logger.info "running ${mvnExec} in dir: ${serviceDir}/${config.scm.projectName} with arguments: ${arguments}"

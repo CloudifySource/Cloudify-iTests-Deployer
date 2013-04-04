@@ -76,7 +76,7 @@ def counter(toCount) {
 
 def teardownIfManagementServiceInstallFails(Hashtable installServiceResults) {
     if (installServiceResults['result'] as int != 0) {
-        logger.severe "isntall manegement service failed, finishing run"
+        logger.severe "install management service failed, finishing run"
         def teardownResults = cloudify "teardown-cloud ${commandOptions} ec2"
         if (teardownResults['result'] as int != 0) {
             //TODO send mail
@@ -128,10 +128,10 @@ if (shouldBootstrap()){
 
     logger.info "inject mysql username and password"
     replaceTextInFile "${scriptDir}/../resources/services/mysql/mysql-service.properties",
-            ['^dbUser.*$':"dbUser='${config.MYSQL_USER}'", '^dbPassW.*$' : "dbPassW='${config.MYSQL_PASS}'"]
+            ["^dbUser.*\$":"dbUser='${config.MYSQL_USER}'", "^dbPassW.*\$" : "dbPassW='${config.MYSQL_PASS}'"]
 
     replaceTextInFile "${scriptDir}/../resources/services/tomcat/tomcat-service.properties",
-            ['^javaOpts.*$':"javaOpts='-Dmysql.user=${config.MYSQL_USER} -Dmysql.pass=${config.MYSQL_PASS}'"]
+            ["^javaOpts.*\$":"javaOpts='-Dmysql.user=${config.MYSQL_USER} -Dmysql.pass=${config.MYSQL_PASS}'"]
 
 
 
