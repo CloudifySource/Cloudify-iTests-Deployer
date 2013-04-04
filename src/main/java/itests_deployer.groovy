@@ -29,7 +29,7 @@ def replaceTextInFile(String filePath, Map<String, String> properties){
     def file = new File(filePath) as File
     def propsText = file.text
     for (it in properties.keySet()) {
-        propsText = propsText.replace(it, properties[it])
+        propsText = propsText.replaceAll(it, properties[it])
     }
     file.write(propsText)
 }
@@ -124,6 +124,17 @@ if (shouldBootstrap()){
         writer -> config.writeTo(writer)
     }
     logger.info "management machine was bootstrapped successfully"
+
+
+    logger.info "inject mysql username and password"
+    replaceTextInFile "${scriptDir}/../resources/services/mysql/mysql-service.properties",
+            ['^dbUser.*$':"dbUser='${config.MYSQL_USER}'", "dbPassW" : "dbPassW='${config.MYSQL_PASS}'"]
+
+    replaceTextInFile "${scriptDir}/../resources/services/tomcat/tomcat-service.properties",
+            ['^javaOpts.*$':"javaOpts='-Dmysql.user=${config.MYSQL_USER} -Dmysql.pass=${config.MYSQL_PASS}'"]
+
+
+
     logger.info "installing mysql service on the management machine..."
     def installSQLResults = cloudify "install-service ${commandOptions} ${scriptDir}/../resources/services/mysql"
     teardownIfManagementServiceInstallFails(installSQLResults)
@@ -132,6 +143,7 @@ if (shouldBootstrap()){
     //logger.info "importing existing dashboard DB to management machine..."
     //"ssh tgrid@pc-lab24 'mysqldump -u sa dashboard SgtestResult | ssh -i ${config.PEM_FILE} -o StrictHostKeyChecking=no ec2-user@${config.MGT_MACHINE} mysql -u ${config.MYSQL_USER} -p ${config.MYSQL_PASS} dashboard'".execute().waitFor()
 
+    logger.info "installing tomcat service on the management machine..."
     def installTomcatResults = cloudify "install-service ${commandOptions} ${scriptDir}/../resources/services/tomcat"
     teardownIfManagementServiceInstallFails(installTomcatResults)
     logger.info "tomcat service was successfully installed on the management machine"
