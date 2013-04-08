@@ -5,8 +5,8 @@ service {
     statefulProcessingUnit {
         binaries "iTestsManagementSpace"
         sla {
-            memoryCapacity 512
-            maxMemoryCapacity 512
+            memoryCapacity 128
+            maxMemoryCapacity 128
             highlyAvailable true
             memoryCapacityPerContainer 128
         }
