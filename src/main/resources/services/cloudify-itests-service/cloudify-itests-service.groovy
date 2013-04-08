@@ -19,4 +19,12 @@ service {
         }
         stop "cloudify_itests_stop.groovy"
     }
+
+    customCommands ([
+            // A command with two parameters (firstName and lastName)
+            "STOP_TESTS" : {toPrint ->
+                println toPrint
+            }
+    ])
+
 }

@@ -3,7 +3,7 @@ service {
     numInstances 1
     maxAllowedInstances 1
     statefulProcessingUnit {
-        binaries "iTestsManagementSpace"
+        binaries "iTestsManagementSpace/target/iTestsManagementSpace.jar"
         sla {
             memoryCapacity 128
             maxMemoryCapacity 128
