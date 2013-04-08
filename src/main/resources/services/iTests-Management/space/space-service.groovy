@@ -12,4 +12,12 @@ service {
         }
 
     }
+    compute {
+        template "MANAGEMENT_LINUX"
+    }
+    isolationSLA {
+        global {
+            useManagement true
+        }
+    }
 }
