@@ -107,16 +107,15 @@ cloud {
          * Cloud machine templates available with this cloud.
          */
         templates ([
-                // Mandatory. Template Name.
-                MANAGEMENT_LINUX : computeTemplate{
+                SMALL_LINUX : computeTemplate{
                     // Mandatory. Image ID.
-                    imageId manegementImageId
+                    imageId linuxImageId
                     // Mandatory. Files from the local directory will be copied to this directory on the remote machine.
                     remoteDirectory "/home/ec2-user/gs-files"
                     // Mandatory. Amount of RAM available to machine.
-                    machineMemoryMB 3600
+                    machineMemoryMB 1600
                     // Mandatory. Hardware ID.
-                    hardwareId manegementhardwareId
+                    hardwareId hardwareId
                     // Optional. Location ID.
                     locationId locationId
                     // Mandatory. All files from this LOCAL directory will be copied to the remote machine directory.
@@ -145,15 +144,16 @@ cloud {
 
 
                 },
-                SMALL_LINUX : computeTemplate{
+                // Mandatory. Template Name.
+                MANAGEMENT_LINUX : computeTemplate{
                     // Mandatory. Image ID.
-                    imageId linuxImageId
+                    imageId manegementImageId
                     // Mandatory. Files from the local directory will be copied to this directory on the remote machine.
                     remoteDirectory "/home/ec2-user/gs-files"
                     // Mandatory. Amount of RAM available to machine.
-                    machineMemoryMB 1600
+                    machineMemoryMB 3600
                     // Mandatory. Hardware ID.
-                    hardwareId hardwareId
+                    hardwareId manegementhardwareId
                     // Optional. Location ID.
                     locationId locationId
                     // Mandatory. All files from this LOCAL directory will be copied to the remote machine directory.
