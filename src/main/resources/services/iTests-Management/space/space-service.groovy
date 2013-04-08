@@ -1,6 +1,5 @@
 service {
     name "space"
-    icon "gigaspaces_logo.gif"
     numInstances 1
     statefulProcessingUnit {
         binaries "iTestsManagementSpace/target/iTestsManagementSpace.jar"
