@@ -185,9 +185,11 @@ if (installServiceResults['result'] as int != 0){
 logger.info "poll for suite completion"
 def testRunIdReverse = "${props['testRunId']}".reverse()
 int count
+int status = 0
 while((count = counter(props['testRunId'])) > 0){
     if (counter("failed-${testRunIdReverse}") != 0){
         logger.severe "test run failed in service instance with id(s) ${getServiceAttributes().grep("failed-${testRunIdReverse}")}, uninstalling service ${props['testRunId']}"
+        status = 1
         break
     }
     logger.info "test run ${props["testRunId"]} still has ${count} suites running"
@@ -205,4 +207,4 @@ logger.info "uninstalled iTest service successfully"
 logger.info "removing ${props['testRunId']} service dir"
 new File(props["testRunId"]).deleteDir()
 
-System.exit 0
+System.exit status
