@@ -1,13 +1,13 @@
 service {
     name "space"
+    icon "gigaspaces_logo.gif"
     numInstances 1
-    maxAllowedInstances 1
     statefulProcessingUnit {
         binaries "iTestsManagementSpace/target/iTestsManagementSpace.jar"
         sla {
             memoryCapacity 128
             maxMemoryCapacity 128
-            highlyAvailable true
+            highlyAvailable false
             memoryCapacityPerContainer 128
         }
 
