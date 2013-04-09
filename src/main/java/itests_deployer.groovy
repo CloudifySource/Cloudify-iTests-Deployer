@@ -134,14 +134,14 @@ if (shouldBootstrap()){
             ['javaOpts=".*"' : "javaOpts=\"-Dmysql.user=${config.MYSQL_USER} -Dmysql.pass=${config.MYSQL_PASS}\""]
 
     logger.info "preparing the iTestsManagementSpace"
-    def builder = new AntBuilder()
-    builder.exec(executable: "mvn",
-            dir: "../resources/services/iTests-Management/space/iTestsManagementSpace",
+    def mvnBuilder = new AntBuilder()
+    mvnBuilder.exec(executable: "mvn",
+            dir: "${scriptDir}/../resources/services/iTests-Management/space/iTestsManagementSpace",
             outputProperty: 'output',
             resultProperty: 'result') {
         arg(line: "package")
     }
-    teardownIfManagementInstallFails(builder.project.properties)
+    teardownIfManagementInstallFails(mvnBuilder.project.properties)
 
     logger.info "installing iTests-Management application on the management machine..."
     def installResults = cloudify "install-application ${commandOptions} ${scriptDir}/../resources/services/iTests-Management"
