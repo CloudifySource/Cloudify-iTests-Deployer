@@ -123,7 +123,7 @@ if (shouldBootstrap()){
     deployerPropertiesFile.withWriter {
         writer -> config.writeTo(writer)
     }
-    logger.info "management machine was bootstrapped successfully"
+    logger.info "management machine was bootstrapped successfully on ${config.MGT_MACHINE}"
 
 
     logger.info "inject mysql username and password"
