@@ -6,7 +6,7 @@
 
 service {
     name "<name>"
-    icon "QA.jpg"
+    icon "qa.JPG"
     type "WEB_SERVER"
     numInstances "<numInstances>"
     maxAllowedInstances "<numInstances>"
