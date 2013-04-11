@@ -12,6 +12,6 @@ def gsm = agent.startGridServiceAndWait(new GridServiceManagerOptions())
 def pu = gsm.deploy(
         new ProcessingUnitDeployment(
                 new File(
-                        "${context.serviceDirectory}iTestsManagementSpace/target/iTestsManagementSpace.jar")))
+                        "${context.serviceDirectory}/iTestsManagementSpace/target/iTestsManagementSpace.jar")))
 
 pu.waitForSpace(5, TimeUnit.MINUTES)
