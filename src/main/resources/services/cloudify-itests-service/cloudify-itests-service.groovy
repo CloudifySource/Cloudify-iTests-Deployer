@@ -27,8 +27,11 @@ service {
     customCommands ([
 
             "STOP_TESTS" : {
-                def gigaSpace = new GigaSpaceConfigurer(new UrlSpaceConfigurer("/./iTestsManagementSpace")).gigaSpace();
-                gigaSpace.write(new SpaceDocument().addProperties(['id': "<name>", 'stop' : true]))
+                def gigaSpace = new GigaSpaceConfigurer(
+                        new UrlSpaceConfigurer("/./iTestsManagementSpace")).gigaSpace();
+                gigaSpace.write(new SpaceDocument()
+                        .setTypeName("TestSuiteStatus")
+                        .addProperties(['id': "<name>", 'stop' : true]))
             }
     ])
 
