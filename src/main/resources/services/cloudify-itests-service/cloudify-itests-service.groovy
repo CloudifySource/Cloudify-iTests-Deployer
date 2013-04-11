@@ -1,3 +1,7 @@
+import com.gigaspaces.document.SpaceDocument
+import org.openspaces.core.GigaSpaceConfigurer
+import org.openspaces.core.space.UrlSpaceConfigurer
+
 /**
  * User: Sagi Bernstein
  * Date: 10/02/13
@@ -21,9 +25,10 @@ service {
     }
 
     customCommands ([
-            // A command with two parameters (firstName and lastName)
-            "STOP_TESTS" : {toPrint ->
-                println toPrint
+
+            "STOP_TESTS" : {
+                def gigaSpace = new GigaSpaceConfigurer(new UrlSpaceConfigurer("/./iTestsManagementSpace")).gigaSpace();
+                gigaSpace.write(new SpaceDocument().addProperties(['id': "<name>", 'stop' : true]))
             }
     ])
 

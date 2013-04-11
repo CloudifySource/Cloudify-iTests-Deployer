@@ -14,7 +14,7 @@ service {
     }*/
 
     lifecycle{
-        init "start_space.groovy"
+        install "start_space.groovy"
         /*startDetection {
             return ServiceUtils.isPortOccupied(71)
         }*/
