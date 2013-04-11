@@ -1,5 +1,3 @@
-import org.cloudifysource.dsl.utils.ServiceUtils
-
 service {
     name "space"
     numInstances 1
@@ -16,7 +14,7 @@ service {
     }*/
 
     lifecycle{
-        start "start_space.groovy"
+        init "start_space.groovy"
         /*startDetection {
             return ServiceUtils.isPortOccupied(71)
         }*/
