@@ -45,9 +45,7 @@ def cloudify(arguments, shouldConnect){
                 dir:"${config.CLOUDIFY_HOME}/tools/cli",
                 outputProperty: 'output',
                 resultProperty: 'result'
-                ) {
-            arg(value: arguments)
-        }
+                ) {arg(value: arguments)}
     }
     return ant.project.properties
 }
@@ -87,6 +85,7 @@ def teardownIfManagementInstallFails(Hashtable installServiceResults) {
     }
 }
 
+//start
 
 props['<buildNumber>'] = args[i++]                 //0
 props['<version>'] = args[i++]                     //1
@@ -119,10 +118,8 @@ if (shouldBootstrap()){
         exitOnError "bootstrap failed, finishing run", bootstrapResults['output'], bootstrapResults['result']
     }
     config.MGT_MACHINE = bootstrapResults['output'].find("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}")
+    deployerPropertiesFile.withWriter {writer -> config.writeTo(writer)}
 
-    deployerPropertiesFile.withWriter {
-        writer -> config.writeTo(writer)
-    }
     logger.info "management machine was bootstrapped successfully on ${config.MGT_MACHINE}"
 
 
@@ -138,9 +135,7 @@ if (shouldBootstrap()){
     mvnBuilder.exec(executable: "mvn",
             dir: "${scriptDir}/../resources/services/iTests-Management/space/iTestsManagementSpace",
             outputProperty: 'output',
-            resultProperty: 'result') {
-        arg(line: "package")
-    }
+            resultProperty: 'result') {arg(line: "package")}
     teardownIfManagementInstallFails(mvnBuilder.project.properties)
 
     logger.info "installing iTests-Management application on the management machine..."
