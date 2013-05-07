@@ -22,14 +22,16 @@ limitations under the License.
 Manual
 ----------------------
 
-To upgrade the cloudify tester version:
+### To upgrade the cloudify tester version:
 
 1.  remove the build from to `/export/tgrid/itests-deployer/cloudify-home`
 2.  move the new build into the same location
 3.  copy `ec2-cloud.groovy` and `ec2-cloud.properties` from `/export/tgrid/itests-deployer/Cloudify-iTests-Deployer/src/main/resources` to `/export/tgrid/itests-deployer/cloudify-home/clouds/ec2`
 4.  put a *.pem file in the upload folder of the used cloud
+5.  fill in the credentials details in `ec2-cloud.properties`
+6.  make sure the license is valid and copy it to the cloud's cloudify-overrides dir
 
-To run the test suite:
+### To run the test suite:
 
 1.  cd into /export/tgrid/itests-deployer/Cloudify-iTests-Deployer/src/main/java
 2.  (optional) change the mysql username and password to be used in the deployer.properties file
