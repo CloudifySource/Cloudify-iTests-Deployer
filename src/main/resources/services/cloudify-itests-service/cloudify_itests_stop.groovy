@@ -74,13 +74,13 @@ if (context.instanceId == 1){
     buildDir = "${serviceDir}/${config.test.BUILD_DIR}"
 
     executeMaven(mvnExec,
-            "exec:java -Dexec.mainClass=\"org.cloudifysource.quality.iTests.framework.testng.report.TestsReportMerger\" -Dexec.args=\"${config.test.SUITE_NAME}"
+            "exec:java -Dexec.mainClass=\"iTests.framework.testng.report.TestsReportMerger\" -Dexec.args=\"${config.test.SUITE_NAME}"
                     + " ${reportDirPath} ${reportDirPath}\" -Dcloudify.home=${buildDir} -DiTests.credentialsFolder=${context.getServiceDirectory()}/credentials",
             "${serviceDir}/${config.scm.projectName}")
 
     logger.info "running the wiki reporter"
     executeMaven(mvnExec,
-            "exec:java -Dexec.mainClass=\"org.cloudifysource.quality.iTests.framework.testng.report.wiki.WikiReporter\" -Dexec.args=\"${reportDirPath} ${config.test.SUITE_TYPE} ${config.test.BUILD_NUMBER}"
+            "exec:java -Dexec.mainClass=\"iTests.framework.testng.report.wiki.WikiReporter\" -Dexec.args=\"${reportDirPath} ${config.test.SUITE_TYPE} ${config.test.BUILD_NUMBER}"
                     + " ${config.cloudify.version} ${config.cloudify.milestone} \""
                     + " -Dcloudify.home=${buildDir} -DiTests.credentialsFolder=${context.getServiceDirectory()}/credentials"
                     + " -Dmysql.host=${config.test.MGT_MACHINE} -Dmysql.user=${config.mysql.user} -Dmysql.pass=${config.mysql.pass}",
