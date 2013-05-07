@@ -60,7 +60,7 @@ def arguments = "test -e -U -P tgrid-cloudify-iTests " +
         "-Dec2.region=${config.test.EC2_REGION} " +
         "-DipList=${config.test.BYON_MACHINES} " +
         "-Dsupported-clouds=${config.test.SUPPORTED_CLOUDS} " +
-        "-DiTests.credentialsFolder=${context.getServiceDirectory()}/credentials" +
+        "-DiTests.credentialsFolder=${context.getServiceDirectory()}/credentials " +
         "-Dbranch.name=${config.test.BRANCH_NAME}"
 
 try{
