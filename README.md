@@ -34,7 +34,7 @@ To run the test suite:
 1.  cd into /export/tgrid/itests-deployer/Cloudify-iTests-Deployer/src/main/java
 2.  (optional) change the mysql username and password to be used in the deployer.properties file
 2.  run groovy with all the arguments e.g.
-groovy itests_deployer.groovy 4980-74 2.6.0 m1 2 CLOUDIFY REGULAR \**/BadUSMServiceDownAfterUninstallApplicationTest.class,\**/DeploymentsControllerTest.class \**/xen/\**,**/*Abstract*,**/cloud/**,**/cli/cloudify/pu/**,**/cli/cloudify/AdminApiControllerTest**,**/cli/cloudify/security/** eu-west-1 ec2,openstack,rsopenstack,byon dummy dummy dummy dummy dummy dummy 2.6.0-SNAPSHOT
+'groovy itests_deployer.groovy 4980-74 2.6.0 m1 2 CLOUDIFY REGULAR \**/BadUSMServiceDownAfterUninstallApplicationTest.class,\**/DeploymentsControllerTest.class \**/xen/\**,**/*Abstract*,**/cloud/**,**/cli/cloudify/pu/**,**/cli/cloudify/AdminApiControllerTest**,**/cli/cloudify/security/** eu-west-1 ec2,openstack,rsopenstack,byon dummy dummy dummy dummy dummy dummy 2.6.0-SNAPSHOT'
 3.  the argument list by order is:
 	
 	1. build number
@@ -52,4 +52,4 @@ groovy itests_deployer.groovy 4980-74 2.6.0 m1 2 CLOUDIFY REGULAR \**/BadUSMServ
 	13. package name
 	15. xap jdk
 	16. sgtest jdk
-	17.	s3 cloudify publish folder
+	17. s3 cloudify publish folder
