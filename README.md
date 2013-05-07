@@ -35,10 +35,10 @@ To run the test suite:
 2.  (optional) change the mysql username and password to be used in the deployer.properties file
 2.  run groovy with all the arguments e.g.
 
-    groovy itests_deployer.groovy 4980-74 2.6.0 m1 2 CLOUDIFY REGULAR
-    \**/BadUSMServiceDownAfterUninstallApplicationTest.class,\**/DeploymentsControllerTest.class
-    \**/xen/\**,**/*Abstract*,**/cloud/**,**/cli/cloudify/pu/**,**/cli/cloudify/AdminApiControllerTest**,**/cli/cloudify/security/**
-    eu-west-1 ec2,openstack,rsopenstack,byon dummy dummy dummy dummy dummy dummy 2.6.0-SNAPSHOT
+	groovy itests_deployer.groovy 4980-74 2.6.0 m1 2 CLOUDIFY REGULAR
+	\**/BadUSMServiceDownAfterUninstallApplicationTest.class,\**/DeploymentsControllerTest.class
+	\**/xen/\**,**/*Abstract*,**/cloud/**,**/cli/cloudify/pu/**,**/cli/cloudify/AdminApiControllerTest**,**/cli/cloudify/security/**
+	eu-west-1 ec2,openstack,rsopenstack,byon dummy dummy dummy dummy dummy dummy 2.6.0-SNAPSHOT
 
 3.  the argument list by order is:
 	
