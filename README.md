@@ -37,7 +37,7 @@ Manual
 2.  (optional) change the mysql username and password to be used in the deployer.properties file
 2.  run groovy with all the arguments e.g.
 
-	```
+	```shell
 	groovy itests_deployer.groovy 4980-74 2.6.0 m1 2 CLOUDIFY REGULAR
 	**/BadUSMServiceDownAfterUninstallApplicationTest.class,**/DeploymentsControllerTest.class
 	**/xen/**,**/*Abstract*,**/cloud/**,**/cli/cloudify/pu/**,**/cli/cloudify/AdminApiControllerTest**,**/cli/cloudify/security/**
