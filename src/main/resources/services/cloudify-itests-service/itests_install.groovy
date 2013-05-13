@@ -17,8 +17,8 @@ import java.util.concurrent.TimeUnit
 
 
 
-config = new ConfigSlurper().parse(new File("cloudify-itests.properties").text)
-serviceDir = "${System.getProperty("user.home")}/cloudify-itests-service"
+config = new ConfigSlurper().parse(new File("itests-service.properties").text)
+serviceDir = "${System.getProperty("user.home")}/itests-service"
 def context = ServiceContextFactory.getServiceContext()
 
 
@@ -38,7 +38,7 @@ def install(installDir, downloadPath, zipName) {
 
 def pool = Executors.newCachedThreadPool()
 results = pool.invokeAll([
-        { install("${serviceDir}/${config.cloudify.installDir}", config.cloudify.downloadPath, config.cloudify.zipName)
+        { install("${serviceDir}/${config.build.installDir}", config.build.downloadPath, config.build.zipName)
             chmod("${serviceDir}/${config.test.BUILD_DIR}/bin")
             chmod("${serviceDir}/${config.test.BUILD_DIR}/lib")
             chmod("${serviceDir}/${config.test.BUILD_DIR}/tools") },

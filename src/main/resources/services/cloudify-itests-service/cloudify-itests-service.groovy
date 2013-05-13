@@ -16,12 +16,12 @@ service {
     maxAllowedInstances "<numInstances>"
 
     lifecycle{
-        init "cloudify_itests_install.groovy"
-        start "cloudify_itests_start.groovy"
+        init "itests_install.groovy"
+        start "itests_start.groovy"
         locator {
             NO_PROCESS_LOCATORS
         }
-        stop "cloudify_itests_stop.groovy"
+        stop "itests_stop.groovy"
     }
 
     customCommands ([

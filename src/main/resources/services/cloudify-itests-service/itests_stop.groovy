@@ -29,8 +29,8 @@ logger.info "instance ${context.instanceId} is shutting down the start script ru
 if (context.instanceId == 1){
     logger.info "service instance: 1 - merging and reporting"
 
-    serviceDir = "${System.getProperty("user.home")}/cloudify-itests-service"
-    config = new ConfigSlurper().parse(new File("cloudify-itests.properties").text)
+    serviceDir = "${System.getProperty("user.home")}/itests-service"
+    config = new ConfigSlurper().parse(new File("itests-service.properties").text)
 
     def mvnExec = "${serviceDir}/maven/apache-maven-${config.maven.version}/bin/mvn"
 
@@ -73,16 +73,19 @@ if (context.instanceId == 1){
     logger.info "running the tests reports merger"
     buildDir = "${serviceDir}/${config.test.BUILD_DIR}"
 
+
+    type = "${config.test.SUITE_TYPE}".toLowerCase().contains('cloudify') ? 'cloudify' : 'xap'
+
     executeMaven(mvnExec,
             "exec:java -Dexec.mainClass=\"iTests.framework.testng.report.TestsReportMerger\" -Dexec.args=\"${config.test.SUITE_NAME}"
-                    + " ${reportDirPath} ${reportDirPath}\" -Dcloudify.home=${buildDir} -DiTests.credentialsFolder=${context.getServiceDirectory()}/credentials",
+                    + " ${reportDirPath} ${reportDirPath}\" -D${type}.home=${buildDir} -DiTests.credentialsFolder=${context.getServiceDirectory()}/credentials",
             "${serviceDir}/${config.scm.projectName}")
 
     logger.info "running the wiki reporter"
     executeMaven(mvnExec,
             "exec:java -Dexec.mainClass=\"iTests.framework.testng.report.wiki.WikiReporter\" -Dexec.args=\"${reportDirPath} ${config.test.SUITE_TYPE} ${config.test.BUILD_NUMBER}"
-                    + " ${config.cloudify.version} ${config.cloudify.milestone} \""
-                    + " -Dcloudify.home=${buildDir} -DiTests.credentialsFolder=${context.getServiceDirectory()}/credentials"
+                    + " ${config.build.version} ${config.build.milestone} \""
+                    + " -D${type}.home=${buildDir} -DiTests.credentialsFolder=${context.getServiceDirectory()}/credentials"
                     + " -Dmysql.host=${config.test.MGT_MACHINE} -Dmysql.user=${config.mysql.user} -Dmysql.pass=${config.mysql.pass}",
             "${serviceDir}/${config.scm.projectName}")
 

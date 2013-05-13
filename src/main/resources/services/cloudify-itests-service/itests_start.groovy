@@ -5,7 +5,7 @@ import org.cloudifysource.dsl.context.ServiceContextFactory
 import org.jclouds.ContextBuilder
 import org.jclouds.blobstore.BlobStoreContext
 
-import java.util.concurrent.TimeUnit
+
 import java.util.logging.Logger
 
 /**
@@ -28,8 +28,8 @@ def executeMaven (mvnExec, String arguments, directory){
 }
 
 logger = Logger.getLogger(this.getClass().getName())
-serviceDir = "${System.getProperty("user.home")}/cloudify-itests-service"
-config = new ConfigSlurper().parse(new File("cloudify-itests.properties").text)
+serviceDir = "${System.getProperty("user.home")}/itests-service"
+config = new ConfigSlurper().parse(new File("itests-service.properties").text)
 context = ServiceContextFactory.getServiceContext()
 
 logger.info "started running instance: ${context.instanceId} of ${config.test.TEST_RUN_ID}"
@@ -40,11 +40,12 @@ def buildDir = "${serviceDir}/${config.test.BUILD_DIR}"
 
 def mvnExec = "${serviceDir}/maven/apache-maven-${config.maven.version}/bin/mvn"
 
+def type = "${config.test.SUITE_TYPE}".toLowerCase().contains('cloudify') ? 'cloudify' : 'xap'
 def suiteId = context.instanceId - 1
-def arguments = "test -e -U -P tgrid-cloudify-iTests " +
+def arguments = "test -e -U -P tgrid-${type.equals('cloudify') ? '-cloudify-iTests' : '-sgtest-xap'} " +
         "-DiTests.cloud.enabled=true " +
         "-DiTests.buildNumber=${config.test.BUILD_NUMBER} " +
-        "-Dcloudify.home=${buildDir} " +
+        "-D${type}.home=${buildDir} " +
         "-Dincludes=${config.test.INCLUDE} " +
         "-Dexcludes=${config.test.EXCLUDE} " +
         "-Djava.security.policy=policy/policy.all " +
