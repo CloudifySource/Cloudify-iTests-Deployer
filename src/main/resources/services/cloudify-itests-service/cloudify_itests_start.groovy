@@ -50,6 +50,7 @@ def arguments = "test -e -U -P tgrid-cloudify-iTests " +
         "-Djava.security.policy=policy/policy.all " +
         "-Djava.awt.headless=true " +
         "-DiTests.suiteName=${config.test.SUITE_NAME} " +
+        "-DiTests.suiteType=${config.test.SUITE_TYPE} " +
         "-DiTests.suiteId=${suiteId} " +
         "-DiTests.summary.dir=${serviceDir}/${config.test.SUITE_NAME} " +
         "-DiTests.numOfSuites=${config.test.SUITE_NUMBER} " +
