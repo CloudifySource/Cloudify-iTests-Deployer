@@ -33,8 +33,8 @@ Manual
 
 ### To run the test suite:
 
-1.  cd into /export/tgrid/itests-deployer/Cloudify-iTests-Deployer/src/main/java
-2.  (optional) change the mysql username and password to be used in the deployer.properties file
+1.  cd into `/export/tgrid/itests-deployer/Cloudify-iTests-Deployer/src/main/java`
+2.  (optional) change the mysql username and password to be used in the `deployer.properties` file
 2.  run groovy with all the arguments e.g.
 
 	```shell
