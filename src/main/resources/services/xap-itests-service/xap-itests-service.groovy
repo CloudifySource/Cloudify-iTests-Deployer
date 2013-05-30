@@ -5,5 +5,8 @@
  */
 
 service {
-    extend '${user.home}/itests-deployer/Cloudify-iTests-Deployer/src/main/resources/services/cloudify-itests-service'
+    extend '../../resources/services/cloudify-itests-service'
+    name "<name>"
+    numInstances "<numInstances>"
+    maxAllowedInstances "<numInstances>"
 }
