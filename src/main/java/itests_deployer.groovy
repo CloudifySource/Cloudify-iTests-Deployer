@@ -160,24 +160,24 @@ logger.info """management is up
 >>> rest is available at http://${config.MGT_MACHINE}:8100
 >>> dashboard is available at: http://${config.MGT_MACHINE}:8080/dashboard
 >>> test suite is: ${props['<suite.name>']}, split into ${props['<suite.number>']} parts
->>> test suite id is: ${props["testRunId"]}
+>>> test suite id is: ${props['testRunId']}
 """
 
 
 
 logger.info "copy service dir"
-cp "../resources/services/${suiteType}-itests-service", props["testRunId"]
+cp "../resources/services/${suiteType}-itests-service", props['testRunId']
 
-cp "${config.CREDENTIAL_DIR}", "${props["testRunId"]}/credentials"
+cp "${config.CREDENTIAL_DIR}", "${props['testRunId']}/credentials"
 
 
 logger.info "configure test suite"
 props["<mgt.machine>"] = "${config.MGT_MACHINE}"
-def servicePropsPath = "${props["testRunId"]}/itests-service.properties"
+def servicePropsPath = "${props['testRunId']}/itests-service.properties"
 replaceTextInFile servicePropsPath, props
 
-def serviceFilePath = "${props["testRunId"]}/${suiteType}-itests-service.groovy"
-replaceTextInFile serviceFilePath, ["<name>" : props["testRunId"], "<numInstances>" : props["<suite.number>"]]
+def serviceFilePath = "${props['testRunId']}/${suiteType}-itests-service.groovy"
+replaceTextInFile serviceFilePath, ["<name>" : props['testRunId'], "<numInstances>" : props['<suite.number>']]
 
 logger.info "install service"
 def installServiceResults = cloudify "install-service -disableSelfHealing ${commandOptions} ${scriptDir}/${props['testRunId']}"
@@ -197,7 +197,7 @@ while((count = counter(props['testRunId'])) > 0){
         status = 1
         break
     }
-    logger.info "test run ${props["testRunId"]} still has ${count} suites running"
+    logger.info "test run ${props['testRunId']} still has ${count} suites running"
     sleep TimeUnit.MINUTES.toMillis(1)
 }
 
