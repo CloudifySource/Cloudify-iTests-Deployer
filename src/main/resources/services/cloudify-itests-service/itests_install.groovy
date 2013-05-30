@@ -87,7 +87,9 @@ results = pool.invokeAll([
                 case "zip":
                     zipName = type.equals('cloudify') ? "Cloudify-iTests-${branchName}" :"SGTest-${branchName}"
                     projectUrl= type.equals('cloudify') ? 'CloudifySource/Cloudify-iTests' : 'GigaSpaces-QA/SGTest'
+                    //url = 'http://maven-repository.openspaces.org/com/gigaspaces/quality/sgtest/sgtest.zip'
                     install("${serviceDir}", "https://github.com/${projectUrl}/archive/${branchName}.zip", "${zipName}.zip")
+                    //install(url, "${zipName}.zip")
                     new AntBuilder().move(todir : "${serviceDir}/${config.scm.projectName}"){
                         fileset(dir : "${serviceDir}/${zipName}")
                     }
