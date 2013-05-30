@@ -149,11 +149,13 @@ if (shouldBootstrap()){
 }
 
 
-testingBuildVersion = "${config.CLOUDIFY_HOME}/bin/platform-info.sh".execute()
+def testingBuildVersion = "${config.CLOUDIFY_HOME}/bin/platform-info.sh".execute()
+
+def suiteType = props['<suite.type>'].toLowerCase().contains('cloudify') ? 'cloudify' : 'xap'
 
 logger.info """management is up
 >>> the tester build is: ${testingBuildVersion.text.trim()}
->>> the tested build is: GigaSpaces Cloudify ${props['<version>']} ${props['<milestone>'].toUpperCase()} (build ${props['<buildNumber>']})
+>>> the tested build is: GigaSpaces ${suiteType.equals('cloudify') ? 'Cloudify' : 'XAP Premium'} ${props['<version>']} ${props['<milestone>'].toUpperCase()} (build ${props['<buildNumber>']})
 >>> web-ui is available at http://${config.MGT_MACHINE}:8099
 >>> rest is available at http://${config.MGT_MACHINE}:8100
 >>> dashboard is available at: http://${config.MGT_MACHINE}:8080/dashboard
@@ -164,21 +166,21 @@ logger.info """management is up
 
 
 logger.info "copy service dir"
-cp "../resources/services/cloudify-itests-service", props["testRunId"]
+cp "../resources/services/${suiteType}-itests-service", props["testRunId"]
 
 cp "${config.CREDENTIAL_DIR}", "${props["testRunId"]}/credentials"
 
 
 logger.info "configure test suite"
 props["<mgt.machine>"] = "${config.MGT_MACHINE}"
-def servicePropsPath = "${props["testRunId"]}/cloudify-itests.properties"
+def servicePropsPath = "${props["testRunId"]}/itests-service.properties"
 replaceTextInFile servicePropsPath, props
 
-def serviceFilePath = "${props["testRunId"]}/cloudify-itests-service.groovy"
+def serviceFilePath = "${props["testRunId"]}/${suiteType}-itests-service.groovy"
 replaceTextInFile serviceFilePath, ["<name>" : props["testRunId"], "<numInstances>" : props["<suite.number>"]]
 
 logger.info "install service"
-def installServiceResults = cloudify "install-service ${commandOptions} ${scriptDir}/${props['testRunId']}"
+def installServiceResults = cloudify "install-service -disableSelfHealing ${commandOptions} ${scriptDir}/${props['testRunId']}"
 if (installServiceResults['result'] as int != 0){
     exitOnError "installing iTests service failed, finishing run", installServiceResults['output'], installServiceResults['result']
 }
@@ -208,6 +210,6 @@ if (uninstallResults['result'] as int != 0){
 logger.info "uninstalled iTest service successfully"
 
 logger.info "removing ${props['testRunId']} service dir"
-new File(props["testRunId"]).deleteDir()
+new File(props['testRunId']).deleteDir()
 
 System.exit status
