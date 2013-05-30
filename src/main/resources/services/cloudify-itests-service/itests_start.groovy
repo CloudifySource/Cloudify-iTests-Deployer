@@ -5,7 +5,6 @@ import org.cloudifysource.dsl.context.ServiceContextFactory
 import org.jclouds.ContextBuilder
 import org.jclouds.blobstore.BlobStoreContext
 
-
 import java.util.logging.Logger
 
 /**
@@ -42,7 +41,7 @@ def mvnExec = "${serviceDir}/maven/apache-maven-${config.maven.version}/bin/mvn"
 
 def type = "${config.test.SUITE_TYPE}".toLowerCase().contains('cloudify') ? 'cloudify' : 'xap'
 def suiteId = context.instanceId - 1
-def arguments = "test -e -U -P tgrid-${type.equals('cloudify') ? '-cloudify-iTests' : '-sgtest-xap'} " +
+def arguments = "test -e -U -P tgrid-${type.equals('cloudify') ? 'cloudify-iTests' : 'sgtest-xap'} " +
         "-DiTests.cloud.enabled=true " +
         "-DiTests.buildNumber=${config.test.BUILD_NUMBER} " +
         "-D${type}.home=${buildDir} " +
