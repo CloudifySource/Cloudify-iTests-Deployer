@@ -19,6 +19,8 @@ import java.util.concurrent.TimeUnit
 
 config = new ConfigSlurper().parse(new File("itests-service.properties").text)
 serviceDir = "${System.getProperty("user.home")}/itests-service"
+type = "${config.test.SUITE_TYPE}".toLowerCase().contains('cloudify') ? 'cloudify' : 'xap'
+
 def context = ServiceContextFactory.getServiceContext()
 
 
@@ -83,9 +85,11 @@ results = pool.invokeAll([
                     break
 
                 case "zip":
-                    install("${serviceDir}", "https://github.com/CloudifySource/Cloudify-iTests/archive/${branchName}.zip", "Cloudify-iTests-${branchName}.zip")
+                    zipName = type.equals('cloudify') ? "Cloudify-iTests-${branchName}" :"SGTest-${branchName}"
+                    projectUrl= type.equals('cloudify') ? 'CloudifySource/Cloudify-iTests' : 'GigaSpaces-QA/SGTest'
+                    install("${serviceDir}", "https://github.com/${projectUrl}/archive/${branchName}.zip", "${zipName}.zip")
                     new AntBuilder().move(todir : "${serviceDir}/${config.scm.projectName}"){
-                        fileset(dir : "${serviceDir}/Cloudify-iTests-${branchName}")
+                        fileset(dir : "${serviceDir}/${zipName}")
                     }
 
             }

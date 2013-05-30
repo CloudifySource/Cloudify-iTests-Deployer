@@ -79,14 +79,14 @@ if (context.instanceId == 1){
 
         executeMaven(mvnExec,
                 "exec:java -Dexec.mainClass=\"iTests.framework.testng.report.TestsReportMerger\" -Dexec.args=\"${config.test.SUITE_NAME}"
-                        + " ${reportDirPath} ${reportDirPath}\" -D${type}.home=${buildDir} -DiTests.credentialsFolder=${context.getServiceDirectory()}/credentials",
+                        + " ${reportDirPath} ${reportDirPath}\" -D${type}.home=${buildDir} -Dbuild.home=${buildDir} -DiTests.credentialsFolder=${context.getServiceDirectory()}/credentials",
                 "${serviceDir}/${config.scm.projectName}")
 
         logger.info "running the wiki reporter"
         executeMaven(mvnExec,
                 "exec:java -Dexec.mainClass=\"iTests.framework.testng.report.wiki.WikiReporter\" -Dexec.args=\"${reportDirPath} ${config.test.SUITE_TYPE} ${config.test.BUILD_NUMBER}"
                         + " ${config.build.version} ${config.build.milestone} \""
-                        + " -D${type}.home=${buildDir} -DiTests.credentialsFolder=${context.getServiceDirectory()}/credentials"
+                        + " -D${type}.home=${buildDir} -Dbuild.home=${buildDir} -DiTests.credentialsFolder=${context.getServiceDirectory()}/credentials"
                         + " -Dmysql.host=${config.test.MGT_MACHINE} -Dmysql.user=${config.mysql.user} -Dmysql.pass=${config.mysql.pass}",
                 "${serviceDir}/${config.scm.projectName}")
     }

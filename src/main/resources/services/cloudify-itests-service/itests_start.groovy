@@ -45,6 +45,7 @@ def arguments = "test -e -U -P tgrid-${type.equals('cloudify') ? 'cloudify-iTest
         "-DiTests.cloud.enabled=true " +
         "-DiTests.buildNumber=${config.test.BUILD_NUMBER} " +
         "-D${type}.home=${buildDir} " +
+        "-Dbuild.home=${buildDir} " +
         "-Dincludes=${config.test.INCLUDE} " +
         "-Dexcludes=${config.test.EXCLUDE} " +
         "-Djava.security.policy=policy/policy.all " +

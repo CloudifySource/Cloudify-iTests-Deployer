@@ -5,5 +5,5 @@
  */
 
 service {
-    extend '../cloudify-itests-service'
+    extend '${user.home}/itests-deployer/Cloudify-iTests-Deployer/src/main/resources/services/cloudify-itests-service'
 }
