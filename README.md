@@ -33,7 +33,7 @@ Manual
 
 ### To run the test suite:
 
-1.  cd into `/export/tgrid/itests-deployer/Cloudify-iTests-Deployer/src/main/java`
+1.  cd into `/export/tgrid/itests-deployer/Cloudify-iTests-Deployer/src/main/groovy`
 2.  (optional) change the mysql username and password to be used in the `deployer.properties` file
 2.  run groovy with all the arguments e.g.
 
@@ -41,7 +41,7 @@ Manual
 	groovy itests_deployer.groovy 4980-74 2.6.0 m1 2 CLOUDIFY Cloudify-Regression
 	**/BadUSMServiceDownAfterUninstallApplicationTest.class,**/DeploymentsControllerTest.class
 	**/xen/**,**/*Abstract*,**/cloud/**,**/cli/cloudify/pu/**,**/cli/cloudify/AdminApiControllerTest**,**/cli/cloudify/security/**
-	eu-west-1 ec2,openstack,rsopenstack,byon dummy dummy dummy dummy dummy dummy 2.6.0-SNAPSHOT
+	eu-west-1 ec2,openstack,rsopenstack,byon dummy dummy dummy dummy dummy dummy 2.6.0-SNAPSHOT 9.6.0-SNAPSHOT-20130609.b9483-871 2.6.0-SNAPSHOT-20130609.b4983-348
 	```
 
 3.  the argument list by order is:
@@ -63,3 +63,5 @@ Manual
 	16. sgtest jdk
 	17. sgtest jvm settings
 	18. s3 cloudify publish folder
+	19. XAP maven version
+	20. Cloudify maven version

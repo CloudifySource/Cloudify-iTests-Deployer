@@ -63,7 +63,10 @@ def arguments = "test -e -U -P tgrid-${type.equals('cloudify') ? 'cloudify-iTest
         "-DipList=${config.test.BYON_MACHINES} " +
         "-Dsupported-clouds=${config.test.SUPPORTED_CLOUDS} " +
         "-DiTests.credentialsFolder=${context.getServiceDirectory()}/credentials " +
-        "-Dbranch.name=${config.test.BRANCH_NAME}"
+        "-Dbranch.name=${config.test.BRANCH_NAME} " +
+        "-DgsVersion=${config.test.MAVEN_PROJECTS_VERSION_XAP} " +
+        "-DcloudifyVersion=${config.test.MAVEN_PROJECTS_VERSION_CLOUDIFY}"
+
 
 try{
     logger.info "running ${mvnExec} in dir: ${serviceDir}/${config.scm.projectName} with arguments: ${arguments}"
