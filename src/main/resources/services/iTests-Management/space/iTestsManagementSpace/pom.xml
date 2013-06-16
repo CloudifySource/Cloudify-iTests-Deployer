@@ -7,7 +7,7 @@
 
     <properties>
         <gsType>PU</gsType>
-        <gsVersion>9.5.0-RELEASE</gsVersion>
+        <gsVersion>9.6.0-SNAPSHOT</gsVersion>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compile.source>1.6</maven.compile.source>
         <maven.compile.target>1.6</maven.compile.target>

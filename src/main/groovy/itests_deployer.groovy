@@ -45,9 +45,7 @@ def cloudify(arguments, shouldConnect){
                 dir:"${config.CLOUDIFY_HOME}/tools/cli",
                 outputProperty: 'output',
                 resultProperty: 'result'
-                ) {
-            arg(value: arguments)
-        }
+                ) {arg(value: arguments)}
     }
     return ant.project.properties
 }
@@ -87,6 +85,7 @@ def teardownIfManagementInstallFails(Hashtable installServiceResults) {
     }
 }
 
+//start
 
 props['<buildNumber>'] = args[i++]                 //0
 props['<version>'] = args[i++]                     //1
@@ -104,7 +103,9 @@ props['<package.name>'] = args[i++]                //12
 props['<xap.jdk>'] = args[i++]                     //13
 props['<sgtest.jdk>'] = args[i++]                  //14
 props['<sgtest.jvm.settings>'] = args[i++]         //15
-props['<s3_cloudify_publish_folder>'] = args[i]    //16
+props['<s3_cloudify_publish_folder>'] = args[i++]  //16
+props['<maven.version.xap>'] = args[i++]           //17
+props['<maven.version.cloudify>'] = args[i]        //18
 props['testRunId'] = "${props["<suite.name>"]}-${new Date().format 'dd-MM-yyyy-HH-mm-ss' }"
 props['<mysql.user>'] = config.MYSQL_USER as String
 props['<mysql.pass>'] = config.MYSQL_PASS as String
@@ -119,10 +120,8 @@ if (shouldBootstrap()){
         exitOnError "bootstrap failed, finishing run", bootstrapResults['output'], bootstrapResults['result']
     }
     config.MGT_MACHINE = bootstrapResults['output'].find("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}")
+    deployerPropertiesFile.withWriter {writer -> config.writeTo(writer)}
 
-    deployerPropertiesFile.withWriter {
-        writer -> config.writeTo(writer)
-    }
     logger.info "management machine was bootstrapped successfully on ${config.MGT_MACHINE}"
 
 
@@ -138,9 +137,7 @@ if (shouldBootstrap()){
     mvnBuilder.exec(executable: "mvn",
             dir: "${scriptDir}/../resources/services/iTests-Management/space/iTestsManagementSpace",
             outputProperty: 'output',
-            resultProperty: 'result') {
-        arg(line: "package")
-    }
+            resultProperty: 'result') {arg(line: "package")}
     teardownIfManagementInstallFails(mvnBuilder.project.properties)
 
     logger.info "installing iTests-Management application on the management machine..."
@@ -154,36 +151,38 @@ if (shouldBootstrap()){
 }
 
 
-testingBuildVersion = "${config.CLOUDIFY_HOME}/bin/platform-info.sh".execute()
+def testingBuildVersion = "${config.CLOUDIFY_HOME}/bin/platform-info.sh".execute()
+
+def suiteType = props['<suite.type>'].toLowerCase().contains('cloudify') ? 'cloudify' : 'xap'
 
 logger.info """management is up
 >>> the tester build is: ${testingBuildVersion.text.trim()}
->>> the tested build is: GigaSpaces Cloudify ${props['<version>']} ${props['<milestone>'].toUpperCase()} (build ${props['<buildNumber>']})
+>>> the tested build is: GigaSpaces ${suiteType.equals('cloudify') ? 'Cloudify' : 'XAP Premium'} ${props['<version>']} ${props['<milestone>'].toUpperCase()} (build ${props['<buildNumber>']})
 >>> web-ui is available at http://${config.MGT_MACHINE}:8099
 >>> rest is available at http://${config.MGT_MACHINE}:8100
 >>> dashboard is available at: http://${config.MGT_MACHINE}:8080/dashboard
 >>> test suite is: ${props['<suite.name>']}, split into ${props['<suite.number>']} parts
->>> test suite id is: ${props["testRunId"]}
+>>> test suite id is: ${props['testRunId']}
 """
 
 
 
 logger.info "copy service dir"
-cp "../resources/services/cloudify-itests-service", props["testRunId"]
+cp "../resources/services/${suiteType}-itests-service", props['testRunId']
 
-cp "${config.CREDENTIAL_DIR}", "${props["testRunId"]}/credentials"
+cp "${config.CREDENTIAL_DIR}", "${props['testRunId']}/credentials"
 
 
 logger.info "configure test suite"
 props["<mgt.machine>"] = "${config.MGT_MACHINE}"
-def servicePropsPath = "${props["testRunId"]}/cloudify-itests.properties"
+def servicePropsPath = "${props['testRunId']}/itests-service.properties"
 replaceTextInFile servicePropsPath, props
 
-def serviceFilePath = "${props["testRunId"]}/cloudify-itests-service.groovy"
-replaceTextInFile serviceFilePath, ["<name>" : props["testRunId"], "<numInstances>" : props["<suite.number>"]]
+def serviceFilePath = "${props['testRunId']}/${suiteType}-itests-service.groovy"
+replaceTextInFile serviceFilePath, ["<name>" : props['testRunId'], "<numInstances>" : props['<suite.number>']]
 
 logger.info "install service"
-def installServiceResults = cloudify "install-service ${commandOptions} ${scriptDir}/${props['testRunId']}"
+def installServiceResults = cloudify "install-service -disableSelfHealing ${commandOptions} ${scriptDir}/${props['testRunId']}"
 if (installServiceResults['result'] as int != 0){
     exitOnError "installing iTests service failed, finishing run", installServiceResults['output'], installServiceResults['result']
 }
@@ -200,7 +199,7 @@ while((count = counter(props['testRunId'])) > 0){
         status = 1
         break
     }
-    logger.info "test run ${props["testRunId"]} still has ${count} suites running"
+    logger.info "test run ${props['testRunId']} still has ${count} suites running"
     sleep TimeUnit.MINUTES.toMillis(1)
 }
 
@@ -213,6 +212,6 @@ if (uninstallResults['result'] as int != 0){
 logger.info "uninstalled iTest service successfully"
 
 logger.info "removing ${props['testRunId']} service dir"
-new File(props["testRunId"]).deleteDir()
+new File(props['testRunId']).deleteDir()
 
 System.exit status

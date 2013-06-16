@@ -1,9 +1,9 @@
 application {
 	name="iTests-Management"
 
-    service {
+    /*service {
         name = "space"
-    }
+    }*/
 
 
 	service {
