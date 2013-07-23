@@ -92,7 +92,7 @@ if (context.instanceId == 1){
     }
     catch (Exception e){
         logger.severe "caught exception during uninstall - report might not have been sent"
-        logger.severe "ecxption cause: ${e.cause}"
+        logger.severe "exception cause: ${e.cause}"
         e.printStackTrace();
     }
 }
