@@ -85,6 +85,10 @@ def teardownIfManagementInstallFails(Hashtable installServiceResults) {
     }
 }
 
+def isParamValid(String paramValue){
+    return paramValue != null && !paramValue.isEmpty() && !"dummy".equals(paramValue)
+}
+
 //start
 
 props['<buildNumber>'] = args[i++]                 //0
@@ -131,10 +135,11 @@ if (shouldBootstrap()){
 
     logger.info "preparing the iTestsManagementSpace"
     def mvnBuilder = new AntBuilder()
+    mavenRepoLocal = isParamValid("${config.test.MAVEN_REPO_LOCAL}") ? " -Dmaven.repo.local=${config.test.MAVEN_REPO_LOCAL}" : ""
     mvnBuilder.exec(executable: "mvn",
             dir: "${scriptDir}/../resources/services/iTests-Management/space/iTestsManagementSpace",
             outputProperty: 'output',
-            resultProperty: 'result') {arg(line: "package")}
+            resultProperty: 'result') {arg(line: "package" + mavenRepoLocal)}
     teardownIfManagementInstallFails(mvnBuilder.project.properties)
 
     logger.info "installing iTests-Management application on the management machine..."
