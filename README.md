@@ -41,7 +41,7 @@ Manual
 	groovy itests_deployer.groovy 4980-74 2.6.0 m1 2 CLOUDIFY Cloudify-Regression
 	**/BadUSMServiceDownAfterUninstallApplicationTest.class,**/DeploymentsControllerTest.class
 	**/xen/**,**/*Abstract*,**/cloud/**,**/cli/cloudify/pu/**,**/cli/cloudify/AdminApiControllerTest**,**/cli/cloudify/security/**
-	eu-west-1 ec2,openstack,rsopenstack,byon dummy dummy dummy dummy dummy dummy 2.6.0-SNAPSHOT 9.6.0-SNAPSHOT-20130609.b9483-871 2.6.0-SNAPSHOT-20130609.b4983-348 dummy
+	eu-west-1 dummy dummy dummy 2.6.0-SNAPSHOT 9.6.0-SNAPSHOT-20130609.b9483-871 2.6.0-SNAPSHOT-20130609.b4983-348 dummy
 	```
 
 3.  the argument list by order is:
@@ -49,7 +49,7 @@ Manual
 	1. build number
 	2. version
 	3. milestone
-	4. suite number (the number to divied the suite by)
+	4. suite number (the number to divide the suite by)
 	5. suite name
 	6. suite type
 	7. include tests regex
