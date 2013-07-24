@@ -21,9 +21,14 @@ def executeMaven (mvnExec, String arguments, directory){
             newEnvironment : true,
             resultProperty : 'result') {
         env(key:'JAVA_HOME',value:"${System.getProperty("user.home")}/java")
+        env(key:'EXT_JAVA_OPTIONS',value:"\"-Dorg.cloudifysource.rest-client.enable-new-rest-client=true\"")
         arg(line: arguments)
     }
     return ant.project.properties.'result' as int
+}
+
+def isParamValid(String paramValue){
+    return paramValue != null && !paramValue.isEmpty() && !"dummy".equals(paramValue)
 }
 
 logger = Logger.getLogger(this.getClass().getName())
@@ -49,24 +54,22 @@ def arguments = "test -e -U -P tgrid-${type.equals('cloudify') ? 'cloudify-iTest
         "-Dincludes=${config.test.INCLUDE} " +
         "-Dexcludes=${config.test.EXCLUDE} " +
         "-Djava.security.policy=policy/policy.all " +
-        "-Djava.awt.headless=true " +
         "-DiTests.suiteName=${config.test.SUITE_NAME} " +
         "-DiTests.suiteType=${config.test.SUITE_TYPE} " +
         "-DiTests.suiteId=${suiteId} " +
         "-DiTests.summary.dir=${serviceDir}/${config.test.SUITE_NAME} " +
         "-DiTests.numOfSuites=${config.test.SUITE_NUMBER} " +
-        "-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Jdk14Logger " +
-        "-Dcom.gs.logging.level.config=true " +
         "-Djava.util.logging.config.file=${serviceDir}/${config.scm.projectName}/src/main/config/sgtest_logging.properties " +
         "-Dsgtest.buildFolder=${serviceDir} " +
         "-Dec2.region=${config.test.EC2_REGION} " +
         "-DipList=${config.test.BYON_MACHINES} " +
-        "-Dsupported-clouds=${config.test.SUPPORTED_CLOUDS} " +
         "-DiTests.credentialsFolder=${context.getServiceDirectory()}/credentials " +
         "-Dbranch.name=${config.test.BRANCH_NAME} " +
         "-DgsVersion=${config.test.MAVEN_PROJECTS_VERSION_XAP} " +
         "-DcloudifyVersion=${config.test.MAVEN_PROJECTS_VERSION_CLOUDIFY}"
 
+if (isParamValid("${config.test.MAVEN_REPO_LOCAL}"))
+    arguments += " -Dmaven.repo.local=${config.test.MAVEN_REPO_LOCAL}"
 
 try{
     logger.info "running ${mvnExec} in dir: ${serviceDir}/${config.scm.projectName} with arguments: ${arguments}"

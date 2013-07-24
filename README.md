@@ -41,7 +41,7 @@ Manual
 	groovy itests_deployer.groovy 4980-74 2.6.0 m1 2 CLOUDIFY Cloudify-Regression
 	**/BadUSMServiceDownAfterUninstallApplicationTest.class,**/DeploymentsControllerTest.class
 	**/xen/**,**/*Abstract*,**/cloud/**,**/cli/cloudify/pu/**,**/cli/cloudify/AdminApiControllerTest**,**/cli/cloudify/security/**
-	eu-west-1 ec2,openstack,rsopenstack,byon dummy dummy dummy dummy dummy dummy 2.6.0-SNAPSHOT 9.6.0-SNAPSHOT-20130609.b9483-871 2.6.0-SNAPSHOT-20130609.b4983-348
+	eu-west-1 ec2,openstack,rsopenstack,byon dummy dummy dummy dummy dummy dummy 2.6.0-SNAPSHOT 9.6.0-SNAPSHOT-20130609.b9483-871 2.6.0-SNAPSHOT-20130609.b4983-348 dummy
 	```
 
 3.  the argument list by order is:
@@ -55,13 +55,11 @@ Manual
 	7. include tests regex
 	8. exclude tests regex
 	9. ec2 region
-	10. suppported clouds
-	11. byon machines
-	12. branch name
-	13. package name
-	15. xap jdk
-	16. sgtest jdk
-	17. sgtest jvm settings
-	18. s3 cloudify publish folder
-	19. XAP maven version
-	20. Cloudify maven version
+	10. byon machines
+	11. branch name
+	12. package name
+	13. s3 cloudify publish folder
+	14. XAP maven version
+	15. Cloudify maven version
+	16. maven local repository folder
+
