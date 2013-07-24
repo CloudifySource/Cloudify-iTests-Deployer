@@ -19,6 +19,9 @@ def executeMaven (mvnExec, String arguments, directory){
     return ant.properties.'result'
 }
 
+def isParamValid(String paramValue){
+    return paramValue != null && !paramValue.isEmpty() && !"dummy".equals(paramValue)
+}
 
 context = ServiceContextFactory.getServiceContext()
 Logger logger = Logger.getLogger(this.getClass().getName())
@@ -77,9 +80,12 @@ if (context.instanceId == 1){
 
         type = "${config.test.SUITE_TYPE}".toLowerCase().contains('cloudify') ? 'cloudify' : 'xap'
 
+        mavenRepoLocal = isParamValid("${config.test.MAVEN_REPO_LOCAL}") ? " -Dmaven.repo.local=${config.test.MAVEN_REPO_LOCAL}" : ""
+
         executeMaven(mvnExec,
                 "exec:java -Dexec.mainClass=\"iTests.framework.testng.report.TestsReportMerger\" -Dexec.args=\"${config.test.SUITE_NAME}"
-                        + " ${reportDirPath} ${reportDirPath}\" -D${type}.home=${buildDir} -Dbuild.home=${buildDir} -DiTests.credentialsFolder=${context.getServiceDirectory()}/credentials",
+                        + " ${reportDirPath} ${reportDirPath}\" -D${type}.home=${buildDir} -Dbuild.home=${buildDir} -DiTests.credentialsFolder=${context.getServiceDirectory()}/credentials"
+                        + mavenRepoLocal,
                 "${serviceDir}/${config.scm.projectName}")
 
         logger.info "running the wiki reporter"
@@ -87,7 +93,8 @@ if (context.instanceId == 1){
                 "exec:java -Dexec.mainClass=\"iTests.framework.testng.report.wiki.WikiReporter\" -Dexec.args=\"${reportDirPath} ${config.test.SUITE_TYPE} ${config.test.BUILD_NUMBER}"
                         + " ${config.build.version} ${config.build.milestone} \""
                         + " -D${type}.home=${buildDir} -Dbuild.home=${buildDir} -DiTests.credentialsFolder=${context.getServiceDirectory()}/credentials"
-                        + " -Dmysql.host=${config.test.MGT_MACHINE} -Dmysql.user=${config.mysql.user} -Dmysql.pass=${config.mysql.pass}",
+                        + " -Dmysql.host=${config.test.MGT_MACHINE} -Dmysql.user=${config.mysql.user} -Dmysql.pass=${config.mysql.pass}"
+                        + mavenRepoLocal,
                 "${serviceDir}/${config.scm.projectName}")
     }
     catch (Exception e){
