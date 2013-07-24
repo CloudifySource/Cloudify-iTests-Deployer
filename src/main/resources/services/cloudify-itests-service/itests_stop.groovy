@@ -79,13 +79,14 @@ if (context.instanceId == 1){
 
 
         type = "${config.test.SUITE_TYPE}".toLowerCase().contains('cloudify') ? 'cloudify' : 'xap'
+        profile = "tgrid-${type.equals('cloudify') ? 'cloudify-iTests' : 'sgtest-xap'}"
 
         mavenRepoLocal = isParamValid("${config.test.MAVEN_REPO_LOCAL}") ? " -Dmaven.repo.local=${config.test.MAVEN_REPO_LOCAL}" : ""
 
         executeMaven(mvnExec,
                 "exec:java -Dexec.mainClass=\"iTests.framework.testng.report.TestsReportMerger\" -Dexec.args=\"${config.test.SUITE_NAME}"
                         + " ${reportDirPath} ${reportDirPath}\" -D${type}.home=${buildDir} -Dbuild.home=${buildDir} -DiTests.credentialsFolder=${context.getServiceDirectory()}/credentials"
-                        + mavenRepoLocal,
+                        + mavenRepoLocal + " -P " + profile,
                 "${serviceDir}/${config.scm.projectName}")
 
         logger.info "running the wiki reporter"
@@ -94,7 +95,7 @@ if (context.instanceId == 1){
                         + " ${config.build.version} ${config.build.milestone} \""
                         + " -D${type}.home=${buildDir} -Dbuild.home=${buildDir} -DiTests.credentialsFolder=${context.getServiceDirectory()}/credentials"
                         + " -Dmysql.host=${config.test.MGT_MACHINE} -Dmysql.user=${config.mysql.user} -Dmysql.pass=${config.mysql.pass}"
-                        + mavenRepoLocal,
+                        + mavenRepoLocal + " -P " + profile,
                 "${serviceDir}/${config.scm.projectName}")
     }
     catch (Exception e){
