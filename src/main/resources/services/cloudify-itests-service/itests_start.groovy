@@ -21,7 +21,6 @@ def executeMaven (mvnExec, String arguments, directory){
             newEnvironment : true,
             resultProperty : 'result') {
         env(key:'JAVA_HOME',value:"${System.getProperty("user.home")}/java")
-        env(key:'EXT_JAVA_OPTIONS',value:"\"-Dorg.cloudifysource.rest-client.enable-new-rest-client=true\"")
         arg(line: arguments)
     }
     return ant.project.properties.'result' as int
