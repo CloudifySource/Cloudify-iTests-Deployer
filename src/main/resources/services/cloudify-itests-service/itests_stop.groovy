@@ -44,35 +44,31 @@ if (context.instanceId == 1){
         storagePropsStream.close()
         storageConfig = new ConfigSlurper().parse(strorageProps)
         provider = 's3'
-        blobStore  = ContextBuilder.newBuilder(provider)
+        blobStore  = ContextBuilder.newBuilder(provider).name("${config.build.buildNumber}/${config.test.SUITE_NAME}")
                 .credentials("${storageConfig.user}", "${storageConfig.apiKey}")
                 .buildView(BlobStoreContext.class).getBlobStore()
 
-        containerName = "${config.test.TEST_RUN_ID}".toLowerCase()
+        containerName = "gigaspaces-quality"
         reportDirPath = "${serviceDir}/${config.test.SUITE_NAME}"
 
         //Download from s3 bucket
         logger.info "downloading the report files"
         blobStore.list(containerName).each {
-            def outputFileName = "${reportDirPath}/${it.getName()}"
-            logger.info "downloding file ${it.getName()} to ${outputFileName}"
-            def input = blobStore.getBlob(containerName, it.getName()).getPayload().getInput()
-            def output = new FileOutputStream(new File(outputFileName))
-            read = 0
-            byte[] bytes = new byte[1024]
-
-            while ((read = input.read(bytes)) != -1) {
-                output.write(bytes, 0, read)
+            if(it.getName().contains("sgtest-result-")){
+                def outputFileName = "${reportDirPath}/${it.getName()}"
+                logger.info "downloding file ${it.getName()} to ${outputFileName}"
+                def input = blobStore.getBlob(containerName, it.getName()).getPayload().getInput()
+                def output = new FileOutputStream(new File(outputFileName))
+                read = 0
+                byte[] bytes = new byte[1024]
+                while ((read = input.read(bytes)) != -1) {
+                    output.write(bytes, 0, read)
+                }
+                input.close()
+                output.flush()
+                output.close()
             }
-
-            input.close()
-            output.flush()
-            output.close()
         }
-
-        logger.info "removing the container for the run"
-        blobStore.clearContainer(containerName)
-        blobStore.deleteContainer(containerName)
 
         logger.info "running the tests reports merger"
         buildDir = "${serviceDir}/${config.test.BUILD_DIR}"

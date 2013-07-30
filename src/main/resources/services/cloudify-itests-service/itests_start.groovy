@@ -88,16 +88,16 @@ try{
                 .credentials("${storageConfig.user}", "${storageConfig.apiKey}")
                 .buildView(BlobStoreContext.class).getBlobStore()
 
-        containerName = "${config.test.TEST_RUN_ID}".toLowerCase()
+        containerName = "gigaspaces-quality"
         //Instance 1 does merger so no need to upload
         if (context.instanceId != 1){
             logger.info "uploading the report file to ${provider}"
             // create container
-            blobStore.createContainerInLocation(null, containerName)
+            //blobStore.createContainerInLocation(null, containerName)
             // add blob
             reportName = "sgtest-result-${config.test.SUITE_NAME}${suiteId}.xml"
             def reportFilePath = "${serviceDir}/${config.test.SUITE_NAME}/${reportName}"
-            blob = blobStore.blobBuilder(reportName)
+            blob = blobStore.blobBuilder("${config.build.buildNumber}/${config.test.SUITE_NAME}/${reportName}")
                     .payload(new File(reportFilePath)).build()
             blobStore.putBlob(containerName, blob)
         }
