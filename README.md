@@ -29,7 +29,7 @@ Manual
 3.  copy `ec2-cloud.groovy` and `ec2-cloud.properties` from `/export/tgrid/itests-deployer/Cloudify-iTests-Deployer/src/main/resources` to `/export/tgrid/itests-deployer/cloudify-home/clouds/ec2`
 4.  put a *.pem file in the upload folder of the used cloud
 5.  fill in the credentials details in `ec2-cloud.properties`
-6.  make sure the license is valid and copy it to the cloud's cloudify-overrides dir
+6.  make sure the license is valid and copy it to the cloud's cloudify-overrides dir (Big Data)
 
 ### To run the test suite:
 
