@@ -7,6 +7,8 @@ import org.jclouds.blobstore.BlobStoreContext
 
 import java.util.logging.Logger
 
+import static org.jclouds.blobstore.options.ListContainerOptions.Builder.inDirectory
+
 def executeMaven (mvnExec, String arguments, directory){
 
     def ant = new AntBuilder().exec(executable: mvnExec,
@@ -44,7 +46,7 @@ if (context.instanceId == 1){
         storagePropsStream.close()
         storageConfig = new ConfigSlurper().parse(strorageProps)
         provider = 's3'
-        blobStore  = ContextBuilder.newBuilder(provider).name("${config.build.buildNumber}/${config.test.SUITE_NAME}")
+        blobStore  = ContextBuilder.newBuilder(provider)
                 .credentials("${storageConfig.user}", "${storageConfig.apiKey}")
                 .buildView(BlobStoreContext.class).getBlobStore()
 
@@ -53,8 +55,9 @@ if (context.instanceId == 1){
 
         //Download from s3 bucket
         logger.info "downloading the report files"
-        blobStore.list(containerName).each {
-            if(it.getName().contains("sgtest-result-")){
+        blobStore.list(containerName, inDirectory("${config.build.buildNumber}/${config.test.SUITE_NAME}"))
+                .grep {return it.getName().contains("sgtest-result-")}
+                .each {
                 def outputFileName = "${reportDirPath}/${it.getName()}"
                 logger.info "downloding file ${it.getName()} to ${outputFileName}"
                 def input = blobStore.getBlob(containerName, it.getName()).getPayload().getInput()
@@ -67,7 +70,6 @@ if (context.instanceId == 1){
                 input.close()
                 output.flush()
                 output.close()
-            }
         }
 
         logger.info "running the tests reports merger"
