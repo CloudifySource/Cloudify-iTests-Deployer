@@ -58,7 +58,8 @@ if (context.instanceId == 1){
         blobStore.list(containerName, inDirectory("${config.build.buildNumber}/${config.test.SUITE_NAME}"))
                 .grep {return it.getName().contains("sgtest-result-")}
                 .each {
-                def outputFileName = "${reportDirPath}/${it.getName()}"
+                def fileNameSplit = it.getName().split("/")
+                def outputFileName = "${reportDirPath}/${fileNameSplit[fileNameSplit.length - 1]}"
                 logger.info "downloding file ${it.getName()} to ${outputFileName}"
                 def input = blobStore.getBlob(containerName, it.getName()).getPayload().getInput()
                 def output = new FileOutputStream(new File(outputFileName))
