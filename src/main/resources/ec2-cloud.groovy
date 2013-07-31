@@ -185,13 +185,13 @@ cloud {
                 // Mandatory. Template Name.
                 MANAGEMENT_LINUX : computeTemplate{
                     // Mandatory. Image ID.
-                    imageId manegementImageId
+                    imageId managementImageId
                     // Mandatory. Files from the local directory will be copied to this directory on the remote machine.
                     remoteDirectory "/home/ec2-user/gs-files"
                     // Mandatory. Amount of RAM available to machine.
                     machineMemoryMB 3600
                     // Mandatory. Hardware ID.
-                    hardwareId manegementHardwareId
+                    hardwareId managementHardwareId
                     // Optional. Location ID.
                     locationId locationId
                     // Mandatory. All files from this LOCAL directory will be copied to the remote machine directory.
