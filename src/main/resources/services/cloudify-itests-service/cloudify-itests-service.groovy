@@ -35,4 +35,8 @@ service {
             }
     ])
 
+    compute {
+        template "MEDIUM_LINUX"
+    }
+
 }
