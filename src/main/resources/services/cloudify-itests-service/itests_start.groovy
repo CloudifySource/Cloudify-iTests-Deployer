@@ -1,7 +1,7 @@
 @Grapes(
         @Grab(group='org.jclouds.api', module='s3', version='1.5.8')
 )
-import org.cloudifysource.dsl.context.ServiceContextFactory
+import org.cloudifysource.utilitydomain.context.ServiceContextFactory
 import org.jclouds.ContextBuilder
 import org.jclouds.blobstore.BlobStoreContext
 
@@ -87,7 +87,6 @@ try{
         blobStore  = ContextBuilder.newBuilder(provider)
                 .credentials("${storageConfig.user}", "${storageConfig.apiKey}")
                 .buildView(BlobStoreContext.class).getBlobStore()
-
         containerName = "gigaspaces-quality"
         //Instance 1 does merger so no need to upload
         if (context.instanceId != 1){

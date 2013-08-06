@@ -1,7 +1,7 @@
 @Grapes(
         @Grab(group = 'org.eclipse.jgit', module = 'org.eclipse.jgit', version = '2.2.0.201212191850-r')
 )
-import org.cloudifysource.dsl.context.ServiceContextFactory
+import org.cloudifysource.utilitydomain.context.ServiceContextFactory
 import org.cloudifysource.dsl.utils.ServiceUtils
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder
