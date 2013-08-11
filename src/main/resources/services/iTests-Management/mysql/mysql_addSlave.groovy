@@ -15,7 +15,7 @@
 *******************************************************************************/
 import org.hyperic.sigar.OperatingSystem
 import org.cloudifysource.dsl.utils.ServiceUtils;
-import org.cloudifysource.dsl.context.ServiceContextFactory
+import org.cloudifysource.utilitydomain.context.ServiceContextFactory
 import static mysql_runner.*
 
 
@@ -89,3 +89,4 @@ runMysqlQuery(binFolder,osConfig.mysqlProgram,currOsName,currQuery as String,cur
 							
 println "mysql_addSlave.groovy: End"
 	
+

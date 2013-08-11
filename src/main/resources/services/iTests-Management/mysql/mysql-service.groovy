@@ -28,19 +28,10 @@ service {
 	maxAllowedInstances 3	
 	
 	compute {
-		template "MANAGEMENT_LINUX"
-	}
-	isolationSLA {		
-		global {
-			useManagement true
-		}
-	}
-	storage {
-		template "SMALL_BLOCK"
-	}
-
+		template "SMALL_LINUX"
+	}	
 	
-	lifecycle {
+	lifecycle{
  
 		install "mysql_install.groovy"
 
@@ -69,15 +60,31 @@ service {
 			def myPids = ServiceUtils.ProcessUtils.getPidsWithQuery("State.Name.re=mysql.*\\.exe|mysqld")
 			println ":mysql-service.groovy: current PIDs: ${myPids}"
 			return myPids
-        }	
+		}
+		
+		details {
+			def currPublicIP
+			
+			if ( context.isLocalCloud() ) {
+				currPublicIP = InetAddress.localHost.hostAddress	
+			}
+			else {
+				currPublicIP =context.getPublicAddress()	
+			}
+			return [	
+				"MySQL IP":currPublicIP,
+				"MySQL Port":jdbcPort
+			]
+		}	
 	}
 	
 	customCommands ([
-		/* 
-			This custom command enables users to create a database snapshot (mysqldump).
-			Usage :  invoke mysql mysqldump actionUser dumpPrefix [dbName]
-			Example: invoke mysql mysqldump root myPrefix_ myDbName
-		*/
+	/* 
+	This custom command enables users to create a database snapshot (mysqldump) 
+	 and to upload the backup to an external storage (Amazon S3 for example).
+	Usage :  invoke mysql mysqldump actionUser dumpPrefix dbName backupType bucketName
+	Example: invoke mysql mysqldump root myPrefix_ myDbName s3 myBucketName
+	*/
 	
 		"mysqldump" : "mysql_dump.groovy" , 
 			
