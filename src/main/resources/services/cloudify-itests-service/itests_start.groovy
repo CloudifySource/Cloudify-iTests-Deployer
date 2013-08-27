@@ -91,14 +91,22 @@ try{
         //Instance 1 does merger so no need to upload
         if (context.instanceId != 1){
             logger.info "uploading the report file to ${provider}"
-            // create container
-            //blobStore.createContainerInLocation(null, containerName)
             // add blob
             reportName = "sgtest-result-${config.test.SUITE_NAME}${suiteId}.xml"
             def reportFilePath = "${serviceDir}/${config.test.SUITE_NAME}/${reportName}"
-            blob = blobStore.blobBuilder("${config.build.buildNumber}/${config.test.SUITE_NAME}/${reportName}")
-                    .payload(new File(reportFilePath)).build()
-            blobStore.putBlob(containerName, blob)
+            try {
+                blob = blobStore.blobBuilder("${config.build.buildNumber}/${config.test.SUITE_NAME}/${reportName}")
+                        .payload(new File(reportFilePath)).build()
+                blobStore.putBlob(containerName, blob)
+                logger.info "Putted to blob ${blob}"
+            }
+            catch (Exception e){
+                logger.severe "Failed to put blob ${blob}"
+            }
+
+        }
+        else {
+            logger.info "First instance ended his tests..Will now wait for all agents to finish their tests"
         }
         context.attributes.thisService.remove "${config.test.TEST_RUN_ID}-${context.instanceId}"
     }

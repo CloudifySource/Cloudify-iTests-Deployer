@@ -54,10 +54,11 @@ if (context.instanceId == 1){
         reportDirPath = "${serviceDir}/${config.test.SUITE_NAME}"
 
         //Download from s3 bucket
-        logger.info "downloading the report files"
-        blobStore.list(containerName, inDirectory("${config.build.buildNumber}/${config.test.SUITE_NAME}"))
-                .grep {return it.getName().contains("sgtest-result-")}
-                .each {
+        logger.info "trying to download the report files"
+        try {
+            blobStore.list(containerName, inDirectory("${config.build.buildNumber}/${config.test.SUITE_NAME}"))
+                    .grep {return it.getName().contains("sgtest-result-")}
+            .each {
                 def fileNameSplit = it.getName().split("/")
                 def outputFileName = "${reportDirPath}/${fileNameSplit[fileNameSplit.length - 1]}"
                 logger.info "downloding file ${it.getName()} to ${outputFileName}"
@@ -71,6 +72,11 @@ if (context.instanceId == 1){
                 input.close()
                 output.flush()
                 output.close()
+            }
+        }
+        catch (Exception e){
+            logger.severe("failed to download file ${it.getName()} to ${outputFileName}")
+            e.printStackTrace();
         }
 
         logger.info "running the tests reports merger"
@@ -106,5 +112,5 @@ if (context.instanceId == 1){
 else{
     logger.info "service instance: ${context.instanceId} - nothing to do on stop"
 }
-
+logger.info "service instance: ${context.instanceId} - stopped working exiting..."
 System.exit 0
