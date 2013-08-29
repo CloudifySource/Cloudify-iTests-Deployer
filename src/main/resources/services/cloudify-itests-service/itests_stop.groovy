@@ -1,6 +1,8 @@
 @Grapes(
         @Grab(group='org.jclouds.api', module='s3', version='1.5.8')
 )
+//this import is used in 9.7.0 in new recipes, the tester machine is now 9.6.0 so the old import is used
+//import org.cloudifysource.utilitydomain.context.ServiceContextFactory
 import org.cloudifysource.dsl.context.ServiceContextFactory
 import org.jclouds.ContextBuilder
 import org.jclouds.blobstore.BlobStoreContext
@@ -55,6 +57,7 @@ if (context.instanceId == 1){
 
         //Download from s3 bucket
         logger.info "trying to download the report files"
+
         try {
             blobStore.list(containerName, inDirectory("${config.build.buildNumber}/${config.test.SUITE_NAME}"))
                     .grep {return it.getName().contains("sgtest-result-")}
@@ -94,7 +97,8 @@ if (context.instanceId == 1){
                         + mavenRepoLocal + " -P " + profile,
                 "${serviceDir}/${config.scm.projectName}")
 
-        logger.info "running the wiki reporter"
+        logger.info "running the wiki reporter \n " +
+                "Arguments are: 1.${reportDirPath}, 2.${config.test.SUITE_TYPE} 3.${config.test.BUILD_NUMBER} 4.${config.build.version} 5.${config.build.milestone}"
         executeMaven(mvnExec,
                 "exec:java -Dexec.mainClass=\"iTests.framework.testng.report.wiki.WikiReporter\" -Dexec.args=\"${reportDirPath} ${config.test.SUITE_TYPE} ${config.test.BUILD_NUMBER}"
                         + " ${config.build.version} ${config.build.milestone} \""

@@ -1,7 +1,9 @@
 @Grapes(
         @Grab(group='org.jclouds.api', module='s3', version='1.5.8')
 )
-import org.cloudifysource.utilitydomain.context.ServiceContextFactory
+//this import is used in 9.7.0 in new recipes, the tester machine is now 9.6.0 so the old import is used
+//import org.cloudifysource.utilitydomain.context.ServiceContextFactory
+import org.cloudifysource.dsl.context.ServiceContextFactory
 import org.jclouds.ContextBuilder
 import org.jclouds.blobstore.BlobStoreContext
 
