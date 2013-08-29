@@ -1,0 +1,44 @@
+Steps to run and maintain iTestsDeployer service:
+
+HOW TO RUN:
+1. Run VNC on user tgrid to 192.168.9.18:3 (can be done with putty but rather be done with VNC in order to keep tests running while your machine is offline)
+2. CD in shell to /export/tgrid/itests-deployer/Cloudify-iTests-Deployer/src/main/groovy 
+3. Run the execution command, e.g:
+
+groovy itests_deployer.groovy 5984-88 2.7.0 m3 10 CLOUDIFY_CLOUDS Cloudify-Regression **/cli/cloudify/cloud/** **/cli/cloudify/cloud/ec2/Ec2SecurityTest*,**/cli/cloudify/cloud/**/examples/**,**/cli/cloudify/cloud/scale/**,**/cli/cloudify/cloud/azure/**,**/cli/cloudify/cloud/byon/**,**/cli/cloudify/cloud/hp/storage/**,**/cli/cloudify/cloud/ec2/bigdata/**,**/cli/cloudify/cloud/ec2win/** us-east-1  dummy dummy dummy 2.7.0-SNAPSHOT 9.7.0-SNAPSHOT 2.7.0-5984-88-SNAPSHOT /tmp/LocalMavenRepos
+
+The arguments order and meaning is:
+0 - tested build number
+1 - tested build version
+2 - tested build milestone
+3 - suite number (how many agent machines will run the tests)
+4 - suite name (e.g CLOUDIFY_CLOUDS, can be taken from quickbuild)
+5 - suite type (e.g Cloudify-Regression, can be taken from quickbuild)
+6 - regex which implies which tests are INCLUDED in the suite seperated by "," (can be taken from quickbuild)
+7 - regex which implies which tests are EXCLUDED in the suite seperated by "," (can be taken from quickbuild)
+8 - ec2 region (when running cloudify clouds should be us-east-1 because of the machine limit in eu-west)
+9 - byon machines (when running byon tests - can be taken from quickbuild) 
+10 - branch name - when this argument is "dummy" the branch is automatically trunk, when testing older versions this argument MUST be changed into the correct branch
+11 - package name 
+12 - s3 cloudify publish folder (e.g 2.7.0-SNAPSHOT)
+13 - maven xap version - the xap version of the tested build (e.g 9.7.0-SNAPSHOT)
+14 - maven cloudify version - the cloudify version of the tested build (2.7.0-5984-88-SNAPSHOT)
+15 - maven repository path in the machines (e.g /tmp/LocalMavenRepos)
+
+HOW TO UPDATE TESTER BUILD:
+The Tester build is located in the client machine (192.168.9.18) under /export/tgrid/itests-deployer/cloudify-home.
+In order to update this build you should:
+1. Get the build and extract it under the same location with the same folder name (cloudify-home).
+	1.1 This build should BigData and should be in s3 (publish builds)
+2. In the updated build the ec2 cloud folder should be updated - in order to support large machines with custom configurations in the cloud driver as well as pem file in the upload folder.
+	2.2 An example of ec2 folder is located in /export/tgrid/itests-deployer/ec2 and could be copied into the new tester build.
+3. Update scripts in /export/tgrid/itests-deployer/Cloudify-iTests-Deployer/src/main/resources/services/iTests-Management (mysql,tomcat) and in 
+   /export/tgrid/itests-deployer/Cloudify-iTests-Deployer/src/main/resources/services/cloudify-itests-service (install,start,stop) to make them run and compile in the tester build.
+
+IMPORTANT NOTE:
+The TESTER version now is 9.6.0 GA - therefore groovy scripts are suitable to CloudifyRecipes branch 2.6.0 (mysql,tomcat and all groovy scripts in itests-service).
+In order to change the TESTER version to newer version you should update all groovy scripts so compilation errors won't occur.
+
+GIT PROJECT:
+URL: https://github.com/CloudifySource/Cloudify-iTests-Deployer
+All changes which were made in the client machine (192.168.9.18) should be eventually committed in the Cloudify-iTests-Deployer project.
