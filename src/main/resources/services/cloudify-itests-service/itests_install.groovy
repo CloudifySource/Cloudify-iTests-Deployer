@@ -1,7 +1,9 @@
 @Grapes(
         @Grab(group = 'org.eclipse.jgit', module = 'org.eclipse.jgit', version = '2.2.0.201212191850-r')
 )
-import org.cloudifysource.utilitydomain.context.ServiceContextFactory
+//this import is used in 9.7.0 in new recipes, the tester machine is now 9.6.0 so the old import is used
+//import org.cloudifysource.utilitydomain.context.ServiceContextFactory
+import org.cloudifysource.dsl.context.ServiceContextFactory
 import org.cloudifysource.dsl.utils.ServiceUtils
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder
