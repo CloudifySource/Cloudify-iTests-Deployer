@@ -7,6 +7,8 @@ import java.util.logging.Logger
  * Time: 15:48
  */
 
+
+
 //variable definitions
 logger = Logger.getLogger(this.getClass().getName())
 scriptDir = new File(getClass().protectionDomain.codeSource.location.path).parent
@@ -65,7 +67,19 @@ def exitOnError(msg, output, errorCode) {
 }
 
 def getServiceAttributes(){
-    return cloudify("list-attributes -scope service:${props["testRunId"]}")['output']
+    int timesToGetServicesAttr = 3;
+    def att = cloudify("list-attributes -scope service:${props["testRunId"]}")['output']
+    while (att == null && timesToGetServicesAttr > 0){
+        logger.info "failed to get service attributes, got ${timesToGetServicesAttr} times to try again"
+        timesToGetServicesAttr = timesToGetServicesAttr - 1;
+        sleep TimeUnit.MINUTES.toMillis(0.5)
+        att = cloudify("list-attributes -scope service:${props["testRunId"]}")['output']
+    }
+    if (att == null) {
+        logger.severe "Error getting service attributes"
+        throw new RuntimeException("Error getting service attributes ${props["testRunId"]}")
+    }
+    return att
 }
 
 def counter(toCount) {
@@ -106,7 +120,8 @@ props['<package.name>'] = args[i++]                //11
 props['<s3_cloudify_publish_folder>'] = args[i++]  //12
 props['<maven.version.xap>'] = args[i++]           //13
 props['<maven.version.cloudify>'] = args[i++]      //14
-props['<maven.repo.local>'] = args[i]              //15
+props['<maven.repo.local>'] = args[i++]            //15
+props['<enableLogstash>'] = args[i]                //16
 props['testRunId'] = "${props["<suite.name>"]}-${new Date().format 'dd-MM-yyyy-HH-mm-ss' }"
 props['<mysql.user>'] = config.MYSQL_USER as String
 props['<mysql.pass>'] = config.MYSQL_PASS as String

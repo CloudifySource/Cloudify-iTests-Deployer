@@ -67,7 +67,9 @@ def arguments = "test -e -U -P tgrid-${type.equals('cloudify') ? 'cloudify-iTest
         "-DiTests.credentialsFolder=${context.getServiceDirectory()}/credentials " +
         "-Dbranch.name=${config.test.BRANCH_NAME} " +
         "-DgsVersion=${config.test.MAVEN_PROJECTS_VERSION_XAP} " +
-        "-DcloudifyVersion=${config.test.MAVEN_PROJECTS_VERSION_CLOUDIFY}"
+        "-DcloudifyVersion=${config.test.MAVEN_PROJECTS_VERSION_CLOUDIFY}" +
+        "-DiTests.enableLogstash=${config.test.ENABLE_LOGSTASH}"
+
 
 if (isParamValid("${config.test.MAVEN_REPO_LOCAL}"))
     arguments += " -Dmaven.repo.local=${config.test.MAVEN_REPO_LOCAL}"
