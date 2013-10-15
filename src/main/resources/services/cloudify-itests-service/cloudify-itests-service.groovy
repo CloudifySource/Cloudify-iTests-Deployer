@@ -36,7 +36,7 @@ service {
     ])
 
     compute {
-        template "MEDIUM_LINUX"
+        template "<computeTemplate>"
     }
 
 }
