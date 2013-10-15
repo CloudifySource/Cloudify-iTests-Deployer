@@ -121,7 +121,8 @@ props['<s3_cloudify_publish_folder>'] = args[i++]  //12
 props['<maven.version.xap>'] = args[i++]           //13
 props['<maven.version.cloudify>'] = args[i++]      //14
 props['<maven.repo.local>'] = args[i++]            //15
-props['<enableLogstash>'] = args[i]                //16
+props['<enableLogstash>'] = args[i++]              //16
+props['<computeTemplate>'] = args[i]               //17
 props['testRunId'] = "${props["<suite.name>"]}-${new Date().format 'dd-MM-yyyy-HH-mm-ss' }"
 props['<mysql.user>'] = config.MYSQL_USER as String
 props['<mysql.pass>'] = config.MYSQL_PASS as String
@@ -197,6 +198,9 @@ replaceTextInFile servicePropsPath, props
 
 def serviceFilePath = "${props['testRunId']}/${suiteType}-itests-service.groovy"
 replaceTextInFile serviceFilePath, ["<name>" : props['testRunId'], "<numInstances>" : props['<suite.number>']]
+
+def serviceComputeTemplate = props['<computeTemplate>'].equals('dummy') ? 'SMALL_LINUX' : 'LARGE_LINUX'
+replaceTextInFile serviceFilePath, ["<computeTemplate>" : serviceComputeTemplate]
 
 logger.info "install service"
 def installServiceResults = cloudify "install-service -disableSelfHealing ${commandOptions} ${scriptDir}/${props['testRunId']}"
