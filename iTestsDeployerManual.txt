@@ -36,6 +36,7 @@ In order to update this build you should:
 	2.2 An example of ec2 folder is located in /export/tgrid/itests-deployer/ec2 and could be copied into the new tester build.
 3. Update scripts in /export/tgrid/itests-deployer/Cloudify-iTests-Deployer/src/main/resources/services/iTests-Management (mysql,tomcat) and in 
    /export/tgrid/itests-deployer/Cloudify-iTests-Deployer/src/main/resources/services/cloudify-itests-service (install,start,stop) to make them run and compile in the tester build.
+4. Update credentials folder (/export/tgrid/itests-deployer/credentials) if any chances were made to it in SVN.
 
 IMPORTANT NOTE:
 The TESTER version now is 9.6.0 GA - therefore groovy scripts are suitable to CloudifyRecipes branch 2.6.0 (mysql,tomcat and all groovy scripts in itests-service).
