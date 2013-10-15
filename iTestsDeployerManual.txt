@@ -5,7 +5,7 @@ HOW TO RUN:
 2. CD in shell to /export/tgrid/itests-deployer/Cloudify-iTests-Deployer/src/main/groovy 
 3. Run the execution command, e.g:
 
-groovy itests_deployer.groovy 5984-88 2.7.0 m3 10 CLOUDIFY_CLOUDS Cloudify-Regression **/cli/cloudify/cloud/** **/cli/cloudify/cloud/ec2/Ec2SecurityTest*,**/cli/cloudify/cloud/**/examples/**,**/cli/cloudify/cloud/scale/**,**/cli/cloudify/cloud/azure/**,**/cli/cloudify/cloud/byon/**,**/cli/cloudify/cloud/hp/storage/**,**/cli/cloudify/cloud/ec2/bigdata/**,**/cli/cloudify/cloud/ec2win/** us-east-1  dummy dummy dummy 2.7.0-SNAPSHOT 9.7.0-SNAPSHOT 2.7.0-5984-88-SNAPSHOT /tmp/LocalMavenRepos
+groovy itests_deployer.groovy 5987-165 2.7.0 m5 2 CLOUDIFY_DEPLOYER Cloudify-Regression **/DeploymentsControllerTest.class,**/cli/cloudify/AdminApiControllerTest** **/xen/**,**/*Abstract*,**/cloud/**,**/cli/cloudify/security/**,**/cli/cloudify/cloud/scale/** us-east-1 dummy master dummy 2.7.0-SNAPSHOT 9.7.0-SNAPSHOT 2.7.0-5987-165-SNAPSHOT /tmp/LocalMavenRepos true dummy
 
 The arguments order and meaning is:
 0 - tested build number
@@ -24,6 +24,8 @@ The arguments order and meaning is:
 13 - maven xap version - the xap version of the tested build (e.g 9.7.0-SNAPSHOT)
 14 - maven cloudify version - the cloudify version of the tested build (2.7.0-5984-88-SNAPSHOT)
 15 - maven repository path in the machines (e.g /tmp/LocalMavenRepos)
+16 - flag which indicates if logstash will be enabled in tests or not (true or false)
+17 - compute template which the service will run on - if dummy then SMALL_LINUX will be chosen, otherwise the input will be chosen
 
 HOW TO UPDATE TESTER BUILD:
 The Tester build is located in the client machine (192.168.9.18) under /export/tgrid/itests-deployer/cloudify-home.
