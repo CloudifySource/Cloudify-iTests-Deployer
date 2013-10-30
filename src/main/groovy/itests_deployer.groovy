@@ -149,15 +149,6 @@ if (shouldBootstrap()){
     replaceTextInFile "${scriptDir}/../resources/services/iTests-Management/tomcat/tomcat-service.properties",
             ['javaOpts=".*"' : "javaOpts=\"-Dmysql.user=${config.MYSQL_USER} -Dmysql.pass=${config.MYSQL_PASS}\""]
 
-    logger.info "preparing the iTestsManagementSpace"
-    def mvnBuilder = new AntBuilder()
-    mavenRepoLocal = isParamValid("${config.test.MAVEN_REPO_LOCAL}") ? " -Dmaven.repo.local=${config.test.MAVEN_REPO_LOCAL}" : ""
-    mvnBuilder.exec(executable: "mvn",
-            dir: "${scriptDir}/../resources/services/iTests-Management/space/iTestsManagementSpace",
-            outputProperty: 'output',
-            resultProperty: 'result') {arg(line: "package" + mavenRepoLocal)}
-    teardownIfManagementInstallFails(mvnBuilder.project.properties)
-
     logger.info "installing iTests-Management application on the management machine..."
     def installResults = cloudify "install-application ${commandOptions} ${scriptDir}/../resources/services/iTests-Management"
     teardownIfManagementInstallFails(installResults)
