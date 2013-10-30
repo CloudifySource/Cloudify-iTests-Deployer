@@ -15,6 +15,8 @@ scriptDir = new File(getClass().protectionDomain.codeSource.location.path).paren
 commandOptions = "--verbose -timeout 15"
 deployerPropertiesFile = new File("${scriptDir}/deployer.properties")
 config = new ConfigSlurper().parse(deployerPropertiesFile.text)
+deployerStaticConfigFile = new File("deployer-config.properties")
+staticConfig = new ConfigSlurper().parse(deployerStaticConfigFile.text)
 props = [:] as Map<String, String>
 def i = 0
 
@@ -40,7 +42,7 @@ def cloudify(arguments, shouldConnect){
     ant = new AntBuilder()
     ant.sequential{
         if(shouldConnect){
-            arguments = "connect ${config.MGT_MACHINE};" + arguments
+            arguments = "connect ${staticConfig.MGT_MACHINE};" + arguments
         }
         exec(executable: "./cloudify.sh",
                 failonerror:false,
@@ -136,10 +138,10 @@ if (shouldBootstrap()){
     if (bootstrapResults['result'] as int != 0){
         exitOnError "bootstrap failed, finishing run", bootstrapResults['output'], bootstrapResults['result']
     }
-    config.MGT_MACHINE = bootstrapResults['output'].find("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}")
+    staticConfig.MGT_MACHINE = bootstrapResults['output'].find("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}")
     deployerPropertiesFile.withWriter {writer -> config.writeTo(writer)}
 
-    logger.info "management machine was bootstrapped successfully on ${config.MGT_MACHINE}"
+    logger.info "management machine was bootstrapped successfully on ${staticConfig.MGT_MACHINE}"
 
 
     logger.info "inject mysql username and password"
@@ -155,7 +157,8 @@ if (shouldBootstrap()){
     logger.info "iTests-Management application was successfully installed on the management machine"
 
     //logger.info "importing existing dashboard DB to management machine..."
-    //"ssh tgrid@pc-lab24 'mysqldump -u sa dashboard SgtestResult | ssh -i ${config.PEM_FILE} -o StrictHostKeyChecking=no ec2-user@${config.MGT_MACHINE} mysql -u ${config.MYSQL_USER} -p ${config.MYSQL_PASS} dashboard'".execute().waitFor()
+    //"ssh tgrid@pc-lab24 'mysqldump -u sa dashboard SgtestResult | ssh -i ${config.PEM_FILE} -o StrictHostKeyChecking=no ec2-user@${staticC
+    // staticConfig.MGT_MACHINE} mysql -u ${config.MYSQL_USER} -p ${config.MYSQL_PASS} dashboard'".execute().waitFor()
 
 }
 
@@ -167,9 +170,9 @@ def suiteType = props['<suite.type>'].toLowerCase().contains('cloudify') ? 'clou
 logger.info """management is up
 >>> the tester build is: ${testingBuildVersion.text.trim()}
 >>> the tested build is: GigaSpaces ${suiteType.equals('cloudify') ? 'Cloudify' : 'XAP Premium'} ${props['<version>']} ${props['<milestone>'].toUpperCase()} (build ${props['<buildNumber>']})
->>> web-ui is available at http://${config.MGT_MACHINE}:8099
->>> rest is available at http://${config.MGT_MACHINE}:8100
->>> dashboard is available at: http://${config.MGT_MACHINE}:8080/dashboard
+>>> web-ui is available at http://${staticConfig.MGT_MACHINE}:8099
+>>> rest is available at http://${staticConfig.MGT_MACHINE}:8100
+>>> dashboard is available at: http://${staticConfig.MGT_MACHINE}:8080/dashboard
 >>> test suite is: ${props['<suite.name>']}, split into ${props['<suite.number>']} parts
 >>> test suite id is: ${props['testRunId']}
 """
@@ -183,7 +186,7 @@ cp "${config.CREDENTIAL_DIR}", "${props['testRunId']}/credentials"
 
 
 logger.info "configure test suite"
-props["<mgt.machine>"] = "${config.MGT_MACHINE}"
+props["<mgt.machine>"] = "${staticConfig.MGT_MACHINE}"
 def servicePropsPath = "${props['testRunId']}/itests-service.properties"
 replaceTextInFile servicePropsPath, props
 
