@@ -177,7 +177,7 @@ logger.info """management is up
 
 
 logger.info "copy service dir"
-cp "../resources/services/${suiteType}-itests-service", props['testRunId']
+cp "${scriptDir}/../resources/services/${suiteType}-itests-service", props['testRunId']
 
 cp "${config.CREDENTIAL_DIR}", "${props['testRunId']}/credentials"
 
