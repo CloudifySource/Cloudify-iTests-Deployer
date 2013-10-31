@@ -42,7 +42,7 @@ def cloudify(arguments, shouldConnect){
     ant = new AntBuilder()
     ant.sequential{
         if(shouldConnect){
-            logger.info "connecting to " + ${staticConfig.MGT_MACHINE};
+            logger.info "connecting to " ${staticConfig.MGT_MACHINE};
             arguments = "connect ${staticConfig.MGT_MACHINE};" + arguments
         }
         exec(executable: "./cloudify.sh",
