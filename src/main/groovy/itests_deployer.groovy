@@ -15,7 +15,7 @@ scriptDir = new File(getClass().protectionDomain.codeSource.location.path).paren
 commandOptions = "--verbose -timeout 15"
 deployerPropertiesFile = new File("${scriptDir}/deployer.properties")
 config = new ConfigSlurper().parse(deployerPropertiesFile.text)
-deployerStaticConfigFile = new File("./deployer-config.properties")
+deployerStaticConfigFile = new File("/export/tgrid/itests-deployer/deployer-config.properties")
 staticConfig = new ConfigSlurper().parse(deployerStaticConfigFile.text)
 props = [:] as Map<String, String>
 def i = 0
@@ -42,7 +42,8 @@ def cloudify(arguments, shouldConnect){
     ant = new AntBuilder()
     ant.sequential{
         if(shouldConnect){
-            logger.info "connecting to " ${staticConfig.MGT_MACHINE};
+            logger.info "deployer config path in method is " + deployerStaticConfigFile.getAbsolutePath();
+            logger.info "connecting to ${staticConfig.MGT_MACHINE}";
             arguments = "connect ${staticConfig.MGT_MACHINE};" + arguments
         }
         exec(executable: "./cloudify.sh",
@@ -134,6 +135,7 @@ logger.info "strating itests suite with id: ${props["testRunId"]}"
 
 logger.info "checking if management machine is up"
 logger.info "deployer config path is " + deployerStaticConfigFile.getAbsolutePath();
+logger.info "mng is: " + staticConfig.getProperty("MGT_MACHINE");
 
 if (shouldBootstrap()){
     logger.info "management is down and should be bootstrapped..."
