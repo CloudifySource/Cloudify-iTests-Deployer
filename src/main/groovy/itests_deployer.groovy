@@ -199,7 +199,7 @@ def serviceComputeTemplate = props['<computeTemplate>'].equals('dummy') ? 'SMALL
 replaceTextInFile serviceFilePath, ["<computeTemplate>" : serviceComputeTemplate]
 
 logger.info "install service"
-def installServiceResults = cloudify "install-service -disableSelfHealing ${commandOptions} ${props['testRunId']}"
+def installServiceResults = cloudify "install-service -disableSelfHealing ${commandOptions} ${scriptDir}/../../../../../${props['testRunId']}"
 if (installServiceResults['result'] as int != 0){
     exitOnError "installing iTests service failed, finishing run", installServiceResults['output'], installServiceResults['result']
 }
