@@ -42,6 +42,7 @@ def cloudify(arguments, shouldConnect){
     ant = new AntBuilder()
     ant.sequential{
         if(shouldConnect){
+            logger.info "connecting to " + ${staticConfig.MGT_MACHINE};
             arguments = "connect ${staticConfig.MGT_MACHINE};" + arguments
         }
         exec(executable: "./cloudify.sh",
@@ -139,7 +140,8 @@ if (shouldBootstrap()){
         exitOnError "bootstrap failed, finishing run", bootstrapResults['output'], bootstrapResults['result']
     }
     staticConfig.MGT_MACHINE = bootstrapResults['output'].find("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}")
-    deployerPropertiesFile.withWriter {writer -> config.writeTo(writer)}
+    logger.info "writing management ip to " + deployerStaticConfigFile.getAbsolutePath();
+    deployerStaticConfigFile.withWriter {writer -> config.writeTo(writer)}
 
     logger.info "management machine was bootstrapped successfully on ${staticConfig.MGT_MACHINE}"
 
