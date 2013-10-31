@@ -133,6 +133,8 @@ props['<mysql.pass>'] = config.MYSQL_PASS as String
 logger.info "strating itests suite with id: ${props["testRunId"]}"
 
 logger.info "checking if management machine is up"
+logger.info "deployer config path is " + deployerStaticConfigFile.getAbsolutePath();
+
 if (shouldBootstrap()){
     logger.info "management is down and should be bootstrapped..."
     def bootstrapResults = cloudify("bootstrap-cloud ${commandOptions} ec2", false)
