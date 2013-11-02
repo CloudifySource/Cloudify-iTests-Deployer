@@ -145,7 +145,7 @@ if (shouldBootstrap()){
     }
     staticConfig.MGT_MACHINE = bootstrapResults['output'].find("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}")
     logger.info "writing management ip to " + deployerStaticConfigFile.getAbsolutePath();
-    deployerStaticConfigFile.withWriter {writer -> config.writeTo(writer)}
+    deployerStaticConfigFile.withWriter {writer -> staticConfig.writeTo(writer)}
 
     logger.info "management machine was bootstrapped successfully on ${staticConfig.MGT_MACHINE}"
 
