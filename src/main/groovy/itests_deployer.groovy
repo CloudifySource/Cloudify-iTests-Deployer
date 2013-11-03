@@ -133,47 +133,51 @@ props['<mysql.pass>'] = config.MYSQL_PASS as String
 
 logger.info "strating itests suite with id: ${props["testRunId"]}"
 
-logger.info "checking if management machine is up"
-logger.info "deployer config path is " + deployerStaticConfigFile.getAbsolutePath();
-logger.info "mng is: " + staticConfig.getProperty("MGT_MACHINE");
+if (props['<suite.name>'].contains("preparation")){
 
-if (shouldBootstrap()){
-    logger.info "management is down and should be bootstrapped..."
-    def bootstrapResults = cloudify("bootstrap-cloud ${commandOptions} ec2", false)
-    if (bootstrapResults['result'] as int != 0){
-        exitOnError "bootstrap failed, finishing run", bootstrapResults['output'], bootstrapResults['result']
+    logger.info "checking if management machine is up"
+    logger.info "deployer config path is " + deployerStaticConfigFile.getAbsolutePath();
+    logger.info "mng is: " + staticConfig.getProperty("MGT_MACHINE");
+
+    if (shouldBootstrap()){
+        logger.info "management is down and should be bootstrapped..."
+        def bootstrapResults = cloudify("bootstrap-cloud ${commandOptions} ec2", false)
+        if (bootstrapResults['result'] as int != 0){
+            exitOnError "bootstrap failed, finishing run", bootstrapResults['output'], bootstrapResults['result']
+        }
+        staticConfig.MGT_MACHINE = bootstrapResults['output'].find("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}")
+        logger.info "writing management ip to " + deployerStaticConfigFile.getAbsolutePath();
+        deployerStaticConfigFile.withWriter {writer -> staticConfig.writeTo(writer)}
+
+        logger.info "management machine was bootstrapped successfully on ${staticConfig.MGT_MACHINE}"
+
+
+        logger.info "inject mysql username and password"
+        replaceTextInFile "${scriptDir}/../resources/services/iTests-Management/mysql/mysql-service.properties",
+                ['dbUser=".*"' : "dbUser=\"${config.MYSQL_USER}\"", 'dbPassW=".*"' : "dbPassW=\"${config.MYSQL_PASS}\""]
+
+        replaceTextInFile "${scriptDir}/../resources/services/iTests-Management/tomcat/tomcat-service.properties",
+                ['javaOpts=".*"' : "javaOpts=\"-Dmysql.user=${config.MYSQL_USER} -Dmysql.pass=${config.MYSQL_PASS}\""]
+
+        logger.info "installing iTests-Management application on the management machine..."
+        def installResults = cloudify "install-application ${commandOptions} ${scriptDir}/../resources/services/iTests-Management"
+        teardownIfManagementInstallFails(installResults)
+        logger.info "iTests-Management application was successfully installed on the management machine"
+
+        //logger.info "importing existing dashboard DB to management machine..."
+        //"ssh tgrid@pc-lab24 'mysqldump -u sa dashboard SgtestResult | ssh -i ${config.PEM_FILE} -o StrictHostKeyChecking=no ec2-user@${staticC
+        // staticConfig.MGT_MACHINE} mysql -u ${config.MYSQL_USER} -p ${config.MYSQL_PASS} dashboard'".execute().waitFor()
+
     }
-    staticConfig.MGT_MACHINE = bootstrapResults['output'].find("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}")
-    logger.info "writing management ip to " + deployerStaticConfigFile.getAbsolutePath();
-    deployerStaticConfigFile.withWriter {writer -> staticConfig.writeTo(writer)}
-
-    logger.info "management machine was bootstrapped successfully on ${staticConfig.MGT_MACHINE}"
-
-
-    logger.info "inject mysql username and password"
-    replaceTextInFile "${scriptDir}/../resources/services/iTests-Management/mysql/mysql-service.properties",
-            ['dbUser=".*"' : "dbUser=\"${config.MYSQL_USER}\"", 'dbPassW=".*"' : "dbPassW=\"${config.MYSQL_PASS}\""]
-
-    replaceTextInFile "${scriptDir}/../resources/services/iTests-Management/tomcat/tomcat-service.properties",
-            ['javaOpts=".*"' : "javaOpts=\"-Dmysql.user=${config.MYSQL_USER} -Dmysql.pass=${config.MYSQL_PASS}\""]
-
-    logger.info "installing iTests-Management application on the management machine..."
-    def installResults = cloudify "install-application ${commandOptions} ${scriptDir}/../resources/services/iTests-Management"
-    teardownIfManagementInstallFails(installResults)
-    logger.info "iTests-Management application was successfully installed on the management machine"
-
-    //logger.info "importing existing dashboard DB to management machine..."
-    //"ssh tgrid@pc-lab24 'mysqldump -u sa dashboard SgtestResult | ssh -i ${config.PEM_FILE} -o StrictHostKeyChecking=no ec2-user@${staticC
-    // staticConfig.MGT_MACHINE} mysql -u ${config.MYSQL_USER} -p ${config.MYSQL_PASS} dashboard'".execute().waitFor()
-
 }
 
+else{
 
-def testingBuildVersion = "${config.CLOUDIFY_HOME}/bin/platform-info.sh".execute()
+    def testingBuildVersion = "${config.CLOUDIFY_HOME}/bin/platform-info.sh".execute()
 
-def suiteType = props['<suite.type>'].toLowerCase().contains('cloudify') ? 'cloudify' : 'xap'
+    def suiteType = props['<suite.type>'].toLowerCase().contains('cloudify') ? 'cloudify' : 'xap'
 
-logger.info """management is up
+    logger.info """management is up
 >>> the tester build is: ${testingBuildVersion.text.trim()}
 >>> the tested build is: GigaSpaces ${suiteType.equals('cloudify') ? 'Cloudify' : 'XAP Premium'} ${props['<version>']} ${props['<milestone>'].toUpperCase()} (build ${props['<buildNumber>']})
 >>> web-ui is available at http://${staticConfig.MGT_MACHINE}:8099
@@ -185,54 +189,55 @@ logger.info """management is up
 
 
 
-logger.info "copy service dir"
-cp "${scriptDir}/../resources/services/${suiteType}-itests-service", props['testRunId']
+    logger.info "copy service dir"
+    cp "${scriptDir}/../resources/services/${suiteType}-itests-service", props['testRunId']
 
-cp "${config.CREDENTIAL_DIR}", "${props['testRunId']}/credentials"
-
-
-logger.info "configure test suite"
-props["<mgt.machine>"] = "${staticConfig.MGT_MACHINE}"
-def servicePropsPath = "${props['testRunId']}/itests-service.properties"
-replaceTextInFile servicePropsPath, props
-
-def serviceFilePath = "${props['testRunId']}/${suiteType}-itests-service.groovy"
-replaceTextInFile serviceFilePath, ["<name>" : props['testRunId'], "<numInstances>" : props['<suite.number>']]
-
-def serviceComputeTemplate = props['<computeTemplate>'].equals('dummy') ? 'SMALL_LINUX' : 'LARGE_LINUX'
-replaceTextInFile serviceFilePath, ["<computeTemplate>" : serviceComputeTemplate]
-
-logger.info "install service"
-def installServiceResults = cloudify "install-service -disableSelfHealing ${commandOptions} ${scriptDir}/${props['testRunId']}"
-if (installServiceResults['result'] as int != 0){
-    exitOnError "installing iTests service failed, finishing run", installServiceResults['output'], installServiceResults['result']
-}
+    cp "${config.CREDENTIAL_DIR}", "${props['testRunId']}/credentials"
 
 
+    logger.info "configure test suite"
+    props["<mgt.machine>"] = "${staticConfig.MGT_MACHINE}"
+    def servicePropsPath = "${props['testRunId']}/itests-service.properties"
+    replaceTextInFile servicePropsPath, props
 
-logger.info "poll for suite completion"
-def testRunIdReverse = "${props['testRunId']}".reverse()
-int count
-int status = 0
-while((count = counter(props['testRunId'])) > 0){
-    if (counter("failed-${testRunIdReverse}") != 0){
-        logger.severe "test run failed in service instance with id(s) ${getServiceAttributes().grep("failed-${testRunIdReverse}")}, uninstalling service ${props['testRunId']}"
-        status = 1
-        break
+    def serviceFilePath = "${props['testRunId']}/${suiteType}-itests-service.groovy"
+    replaceTextInFile serviceFilePath, ["<name>" : props['testRunId'], "<numInstances>" : props['<suite.number>']]
+
+    def serviceComputeTemplate = props['<computeTemplate>'].equals('dummy') ? 'SMALL_LINUX' : 'LARGE_LINUX'
+    replaceTextInFile serviceFilePath, ["<computeTemplate>" : serviceComputeTemplate]
+
+    logger.info "install service"
+    def installServiceResults = cloudify "install-service -disableSelfHealing ${commandOptions} ${scriptDir}/${props['testRunId']}"
+    if (installServiceResults['result'] as int != 0){
+        exitOnError "installing iTests service failed, finishing run", installServiceResults['output'], installServiceResults['result']
     }
-    logger.info "test run ${props['testRunId']} still has ${count} suites running"
-    sleep TimeUnit.MINUTES.toMillis(1)
+
+
+
+    logger.info "poll for suite completion"
+    def testRunIdReverse = "${props['testRunId']}".reverse()
+    int count
+    int status = 0
+    while((count = counter(props['testRunId'])) > 0){
+        if (counter("failed-${testRunIdReverse}") != 0){
+            logger.severe "test run failed in service instance with id(s) ${getServiceAttributes().grep("failed-${testRunIdReverse}")}, uninstalling service ${props['testRunId']}"
+            status = 1
+            break
+        }
+        logger.info "test run ${props['testRunId']} still has ${count} suites running"
+        sleep TimeUnit.MINUTES.toMillis(1)
+    }
+
+    logger.info "uninstalling iTests service..."
+    def uninstallResults = cloudify "uninstall-service ${commandOptions} ${props['testRunId']}"
+    if (uninstallResults['result'] as int != 0){
+        //send mail
+        exitOnError "uninstalling the iTests service failed, finishing run", uninstallResults['output'], uninstallResults['result']
+    }
+    logger.info "uninstalled iTest service successfully"
+
+    logger.info "removing ${props['testRunId']} service dir"
+    new File(props['testRunId']).deleteDir()
+
+    System.exit status
 }
-
-logger.info "uninstalling iTests service..."
-def uninstallResults = cloudify "uninstall-service ${commandOptions} ${props['testRunId']}"
-if (uninstallResults['result'] as int != 0){
-    //send mail
-    exitOnError "uninstalling the iTests service failed, finishing run", uninstallResults['output'], uninstallResults['result']
-}
-logger.info "uninstalled iTest service successfully"
-
-logger.info "removing ${props['testRunId']} service dir"
-new File(props['testRunId']).deleteDir()
-
-System.exit status
