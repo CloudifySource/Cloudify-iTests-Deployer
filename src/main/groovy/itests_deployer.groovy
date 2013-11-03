@@ -13,9 +13,8 @@ import java.util.logging.Logger
 logger = Logger.getLogger(this.getClass().getName())
 //scriptDir = new File(getClass().protectionDomain.codeSource.location.path).getParentFile().getAbsolutePath()
 
-file = new File(${scriptDir})
-logger.info "path: " + file.getAbsolutePath()
-println file.getAbsolutePath()
+logger.info "path: ${scriptDir}"
+println ${scriptDir}
 
 commandOptions = "--verbose -timeout 15"
 deployerPropertiesFile = new File("${scriptDir}/deployer.properties")
