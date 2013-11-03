@@ -14,7 +14,7 @@ logger = Logger.getLogger(this.getClass().getName())
 //scriptDir = new File(getClass().protectionDomain.codeSource.location.path).getParentFile().getAbsolutePath()
 
 logger.info "path: ${scriptDir}"
-println ${scriptDir}
+println scriptDir
 
 commandOptions = "--verbose -timeout 15"
 deployerPropertiesFile = new File("${scriptDir}/deployer.properties")
