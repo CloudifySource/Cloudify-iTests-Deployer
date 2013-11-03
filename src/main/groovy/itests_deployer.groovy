@@ -169,6 +169,8 @@ if (props['<suite.name>'].contains("preparation")){
         // staticConfig.MGT_MACHINE} mysql -u ${config.MYSQL_USER} -p ${config.MYSQL_PASS} dashboard'".execute().waitFor()
 
     }
+    
+    System.exit status
 }
 
 else{
