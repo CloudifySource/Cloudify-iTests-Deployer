@@ -190,9 +190,9 @@ else{
 
 
     logger.info "copy service dir"
-    cp "${scriptDir}/../resources/services/${suiteType}-itests-service", props['testRunId']
+    cp "${scriptDir}/../resources/services/${suiteType}-itests-service", ${scriptDir}/props['testRunId']
 
-    cp "${config.CREDENTIAL_DIR}", "${props['testRunId']}/credentials"
+    cp "${config.CREDENTIAL_DIR}", "${scriptDir}/${props['testRunId']}/credentials"
 
 
     logger.info "configure test suite"
