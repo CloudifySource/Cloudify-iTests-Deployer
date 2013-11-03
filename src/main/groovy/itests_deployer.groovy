@@ -197,10 +197,10 @@ else{
 
     logger.info "configure test suite"
     props["<mgt.machine>"] = "${staticConfig.MGT_MACHINE}"
-    def servicePropsPath = "${props['testRunId']}/itests-service.properties"
+    def servicePropsPath = "${scriptDir}/${props['testRunId']}/itests-service.properties"
     replaceTextInFile servicePropsPath, props
 
-    def serviceFilePath = "${props['testRunId']}/${suiteType}-itests-service.groovy"
+    def serviceFilePath = "${scriptDir}/${props['testRunId']}/${suiteType}-itests-service.groovy"
     replaceTextInFile serviceFilePath, ["<name>" : props['testRunId'], "<numInstances>" : props['<suite.number>']]
 
     def serviceComputeTemplate = props['<computeTemplate>'].equals('dummy') ? 'SMALL_LINUX' : 'LARGE_LINUX'
@@ -237,7 +237,7 @@ else{
     logger.info "uninstalled iTest service successfully"
 
     logger.info "removing ${props['testRunId']} service dir"
-    new File(props['testRunId']).deleteDir()
+    new File("${scriptDir}/${props['testRunId']}").deleteDir()
 
     System.exit status
 }
