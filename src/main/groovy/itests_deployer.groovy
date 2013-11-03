@@ -42,7 +42,6 @@ def cloudify(arguments, shouldConnect){
     ant = new AntBuilder()
     ant.sequential{
         if(shouldConnect){
-            logger.info "deployer config path in method is " + deployerStaticConfigFile.getAbsolutePath();
             logger.info "connecting to ${staticConfig.MGT_MACHINE}";
             arguments = "connect ${staticConfig.MGT_MACHINE};" + arguments
         }
@@ -136,7 +135,6 @@ logger.info "strating itests suite with id: ${props["testRunId"]}"
 if (props['<suite.name>'].contains("preparation")){
 
     logger.info "checking if management machine is up"
-    logger.info "deployer config path is " + deployerStaticConfigFile.getAbsolutePath();
     logger.info "mng is: " + staticConfig.getProperty("MGT_MACHINE");
 
     if (shouldBootstrap()){
@@ -170,7 +168,7 @@ if (props['<suite.name>'].contains("preparation")){
 
     }
     
-    System.exit status
+    System.exit 0
 }
 
 else{
