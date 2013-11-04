@@ -112,31 +112,30 @@ def isParamValid(String paramValue){
 
 //start
 
-props['<buildNumber>'] = args[i++]                                    //0
-props['<version>'] = args[i++]                                             //1
-props['<milestone>'] = args[i++]                                         //2
-props['<suite.number>'] = args[i++]                                   //3
-props['<suite.name>'] = args[i++]                                       //4
-props['<suite.type>'] = args[i++]                                       //5
-props['<include>'] = args[i++]                                             //6
-props['<exclude>'] = args[i++]                                             //7
-props['<ec2.region>'] = args[i++]                                       //8
-props['<byon.machines>'] = args[i++]                                 //9
-props['<branch.name>'] = args[i++]                                     //10
-props['<package.name>'] = args[i++]                                   //11
-props['<s3_cloudify_publish_folder>'] = args[i++]       //12
-props['<maven.version.xap>'] = args[i++]                         //13
-props['<maven.version.cloudify>'] = args[i++]               //14
-props['<maven.repo.local>'] = args[i++]                           //15
-props['<enableLogstash>'] = args[i++]                               //16
-props['<computeTemplate>'] = args[i++]                             //17
-props['<s3_cloudify_package_publish_foldere>'] = args[i++]                             //18
+props['<buildNumber>'] = buildNumber                                                        //0
+props['<version>'] = version                                                                //1
+props['<milestone>'] = milestone                                                            //2
+props['<suite.number>'] = suite_number                                                      //3
+props['<suite.name>'] = suite_name                                                          //4    
+props['<suite.type>'] = suite_type                                                          //5
+props['<include>'] = include                                                                //6
+props['<exclude>'] = exclude                                                                //7
+props['<ec2.region>'] = ec2_region                                                          //8
+props['<byon.machines>'] = byon_machines                                                    //9
+props['<branch.name>'] = branch_name                                                        //10
+props['<package.name>'] = package_name                                                      //11
+props['<s3_cloudify_publish_folder>'] = s3_cloudify_publish_folder                          //12
+props['<maven.version.xap>'] = maven_version_xap                                            //13
+props['<maven.version.cloudify>'] = maven_version_cloudify                                  //14   
+props['<maven.repo.local>'] = maven_repo_local                                              //15
+props['<enableLogstash>'] = enableLogstash                                                  //16
+props['<computeTemplate>'] = computeTemplate                                                //17
+props['<s3_cloudify_package_publish_folder>'] = s3_cloudify_package_publish_folder          //18
 props['testRunId'] = "${props["<suite.name>"]}-${new Date().format 'dd-MM-yyyy-HH-mm-ss' }"
 props['<mysql.user>'] = config.MYSQL_USER as String
 props['<mysql.pass>'] = config.MYSQL_PASS as String
 
 logger.info "strating itests suite with id: ${props["testRunId"]}"
-print "printing with print"
 
 if (props['<suite.name>'].contains("preparation")){
 
