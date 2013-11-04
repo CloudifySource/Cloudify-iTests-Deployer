@@ -11,7 +11,7 @@ import java.util.logging.Logger
 
 //variable definitions
 logger = Logger.getLogger(this.getClass().getName())
-scriptDir = new File(getClass().protectionDomain.codeSource.location.path).getParentFile().getAbsolutePath()
+//scriptDir = new File(getClass().protectionDomain.codeSource.location.path).getParentFile().getAbsolutePath()
 
 logger.info "path: ${scriptDir}"
 println scriptDir
