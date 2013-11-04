@@ -33,6 +33,14 @@ service {
 	def currHttpPort = port + portIncrement
 	def currAjpPort = ajpPort + portIncrement
 	
+	isolationSLA {		
+		global { 
+			instanceCpuCores 0 
+			instanceMemoryMB 128 
+                        useManagement true
+		}
+	}
+	
 	compute {
 		template "SMALL_LINUX"
 	}
