@@ -26,6 +26,14 @@ service {
 	numInstances 1
 	minAllowedInstances 1
 	maxAllowedInstances 3	
+
+	isolationSLA {		
+		global { 
+			instanceCpuCores 0 
+			instanceMemoryMB 128 
+                        useManagement true
+		}
+	}
 	
 	compute {
 		template "SMALL_LINUX"
