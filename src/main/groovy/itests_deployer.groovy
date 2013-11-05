@@ -197,6 +197,7 @@ else{
     logger.info "copy service dir"
     cp "${scriptDir}/../resources/services/${suiteType}-itests-service", "${scriptDir}/${props['testRunId']}"
 
+    logger.info "credentials dir from config file is at: ${config.CREDENTIAL_DIR}"
     cp "${config.CREDENTIAL_DIR}", "${scriptDir}/${props['testRunId']}/credentials"
 
 
