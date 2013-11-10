@@ -16,7 +16,7 @@ logger = Logger.getLogger(this.getClass().getName())
 logger.info "path: ${scriptDir}"
 println scriptDir
 
-commandOptions = "--verbose -timeout 15"
+commandOptions = "--verbose -timeout 20"
 installServiceCommandOptions = "--verbose -timeout 30"
 deployerPropertiesFile = new File("${scriptDir}/deployer.properties")
 config = new ConfigSlurper().parse(deployerPropertiesFile.text)
