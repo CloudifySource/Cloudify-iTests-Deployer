@@ -17,6 +17,7 @@ logger.info "path: ${scriptDir}"
 println scriptDir
 
 commandOptions = "--verbose -timeout 15"
+installServiceCommandOptions = "--verbose -timeout 30"
 deployerPropertiesFile = new File("${scriptDir}/deployer.properties")
 config = new ConfigSlurper().parse(deployerPropertiesFile.text)
 deployerStaticConfigFile = new File("/export/tgrid/itests-deployer/deployer-config.properties")
@@ -213,7 +214,7 @@ else{
     replaceTextInFile serviceFilePath, ["<computeTemplate>" : serviceComputeTemplate]
 
     logger.info "install service"
-    def installServiceResults = cloudify "install-service -disableSelfHealing ${commandOptions} ${scriptDir}/${props['testRunId']}"
+    def installServiceResults = cloudify "install-service -disableSelfHealing ${installServiceCommandOptions} ${scriptDir}/${props['testRunId']}"
     if (installServiceResults['result'] as int != 0){
         exitOnError "installing iTests service failed, finishing run", installServiceResults['output'], installServiceResults['result']
     }
