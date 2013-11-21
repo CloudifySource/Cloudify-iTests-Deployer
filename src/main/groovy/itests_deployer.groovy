@@ -236,7 +236,7 @@ else{
     }
 
     logger.info "sleeping"
-    sleep(1000*60*2)
+    sleep(1000*60*20)
     logger.info "uninstalling iTests service..."
     def uninstallResults = cloudify "uninstall-service ${commandOptions} ${props['testRunId']}"
     if (uninstallResults['result'] as int != 0){
