@@ -24,7 +24,7 @@ service {
     elastic true
 	numInstances 1
 	minAllowedInstances 1
-	maxAllowedInstances 2
+	maxAllowedInstances 1
 	
 	def instanceId = context.instanceId
 	
@@ -33,13 +33,12 @@ service {
 	def currHttpPort = port + portIncrement
 	def currAjpPort = ajpPort + portIncrement
 	
-//	isolationSLA {
-//		global {
-//			instanceCpuCores 0
-//			instanceMemoryMB 128
-//                        useManagement true
-//		}
-//	}
+	isolationSLA {
+		global {
+			instanceCpuCores 0
+			instanceMemoryMB 128
+		}
+	}
 	
 	compute {
 		template "SMALL_LINUX"

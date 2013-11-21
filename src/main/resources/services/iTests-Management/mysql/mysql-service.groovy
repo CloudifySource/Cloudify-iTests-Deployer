@@ -25,15 +25,14 @@ service {
 	elastic true
 	numInstances 1
 	minAllowedInstances 1
-	maxAllowedInstances 3	
+	maxAllowedInstances 1
 
-//	isolationSLA {
-//		global {
-//			instanceCpuCores 0
-//			instanceMemoryMB 128
-//                        useManagement true
-//		}
-//	}
+	isolationSLA {
+		global {
+			instanceCpuCores 0
+			instanceMemoryMB 128
+		}
+	}
 	
 	compute {
 		template "SMALL_LINUX"

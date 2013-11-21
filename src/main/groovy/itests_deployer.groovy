@@ -210,7 +210,7 @@ else{
     def serviceFilePath = "${scriptDir}/${props['testRunId']}/${suiteType}-itests-service.groovy"
     replaceTextInFile serviceFilePath, ["<name>" : props['testRunId'], "<numInstances>" : props['<suite.number>']]
 
-    def serviceComputeTemplate = props['<computeTemplate>'].equals('dummy') ? 'SMALL_LINUX' : 'LARGE_LINUX'
+    def serviceComputeTemplate = props['<computeTemplate>'].equals('default') ? 'SMALL_LINUX' : props['<computeTemplate>']
     replaceTextInFile serviceFilePath, ["<computeTemplate>" : serviceComputeTemplate]
 
     logger.info "install service"
