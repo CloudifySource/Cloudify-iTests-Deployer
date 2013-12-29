@@ -186,6 +186,7 @@ cloud {
                 },
                 // Mandatory. Template Name.
                 LARGE_LINUX : computeTemplate{
+                    openFilesLimit "81920"
                     // Mandatory. Image ID.
                     imageId largeImageId
                     // Mandatory. Files from the local directory will be copied to this directory on the remote machine.
@@ -218,7 +219,7 @@ cloud {
 
                     // enable sudo.
                     privileged true
-                    //initializationCommand "ulimit -n 4000"
+                    //initializationCommand "ulimit -n 4000"                       
                 },
 
                 // Mandatory. Template Name.

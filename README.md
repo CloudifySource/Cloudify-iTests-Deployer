@@ -27,9 +27,14 @@ Manual
 1.  remove the build from to `/export/tgrid/itests-deployer/cloudify-home`
 2.  move the new build into the same location
 3.  copy `ec2-cloud.groovy` and `ec2-cloud.properties` from `/export/tgrid/itests-deployer/Cloudify-iTests-Deployer/src/main/resources` to `/export/tgrid/itests-deployer/cloudify-home/clouds/ec2`
-4.  put a *.pem file in the upload folder of the used cloud
-5.  fill in the credentials details in `ec2-cloud.properties`
-6.  make sure the license is valid and copy it to the cloud's cloudify-overrides dir (Big Data)
+4.  copy `pre-bootstrap.sh` from `/export/tgrid/itests-deployer/Cloudify-iTests-Deployer/src/main/resources` to `/export/tgrid/itests-deployer/cloudify-home/clouds/ec2/upload/cloudify-overrides`
+5.  put a *.pem file in the upload folder of the used cloud
+6.  fill in the credentials details in `ec2-cloud.properties`
+7.  make sure the license is valid and copy it to the cloud's cloudify-overrides dir (Big Data)
+
+Note: make sure all groovy scripts (mysql,tomcat and all groovy scripts in itests-service) compiles with the new version.
+Possible solution: use mysql,tomcat from the updated cloudify-recipes.
+
 
 ### To run the test suite:
 
