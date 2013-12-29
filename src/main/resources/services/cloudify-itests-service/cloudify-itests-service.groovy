@@ -32,7 +32,8 @@ service {
                 gigaSpace.write(new SpaceDocument()
                         .setTypeName("TestSuiteStatus")
                         .addProperties(['id': "<name>", 'stop' : true]))
-            }
+            },
+            "PRINT_LIMITS": "ulimit.sh"
     ])
 
     compute {
