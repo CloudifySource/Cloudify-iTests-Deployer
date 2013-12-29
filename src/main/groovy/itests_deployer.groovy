@@ -246,7 +246,20 @@ else{
     logger.info "uninstalled iTest service successfully"
 
     logger.info "removing ${props['testRunId']} service dir"
-    new File("${scriptDir}/${props['testRunId']}").deleteDir()
+    def workingDir = new File("${scriptDir}/${props['testRunId']}")
+
+    def deleteClosure
+
+    deleteClosure = {
+        it.eachDir( deleteClosure );
+        it.eachFile {
+            it.delete()
+        }
+        it.delete()
+    }
+
+    // Apply closure
+    deleteClosure(workingDir)
 
     System.exit status
 }
