@@ -98,11 +98,13 @@ try{
             // add blob
             reportName = "sgtest-result-${config.test.SUITE_NAME}${suiteId}.xml"
             def reportFilePath = "${serviceDir}/${config.test.SUITE_NAME}/${reportName}"
+            def blob
             try {
                 blob = blobStore.blobBuilder("${config.build.buildNumber}/${config.test.SUITE_NAME}/${reportName}")
                         .payload(new File(reportFilePath)).build()
+                logger.info "putting the blob ${blob}"
                 blobStore.putBlob(containerName, blob)
-                logger.info "Putted to blob ${blob}"
+                logger.info "put the blob ${blob}"
             }
             catch (Exception e){
                 logger.severe "Failed to put blob ${blob}"
