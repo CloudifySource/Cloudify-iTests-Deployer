@@ -1,6 +1,6 @@
 /***************
  * Cloud configuration file for the Amazon ec2 cloud. Uses the default jclouds-based cloud driver.
- * See org.cloudifysource.dsl.cloud.Cloud for more details.
+ * See org.cloudifysource.domain.cloud.Cloud for more details.
  * @author barakme
  *
  */
@@ -31,6 +31,11 @@ cloud {
                 port 14002
             }
         }
+
+        // Optional. Path to folder where management state will be written. Null indicates state will not be written.
+        persistentStoragePath persistencePath
+
+
     }
 
     /*************
@@ -48,7 +53,8 @@ cloud {
         // different HTTP server instead.
         // IMPORTANT: the default linux bootstrap script appends '.tar.gz' to the url whereas the default windows script appends '.zip'.
         // Therefore, if setting a custom URL, make sure to leave out the suffix.
-        // cloudifyUrl "http://repository.cloudifysource.org/org/cloudifysource/2.5.0-SNAPSHOT/gigaspaces-cloudify-2.5.0-rc-b3991-27.zip"
+        // cloudifyUrl "http://repository.cloudifysource.org/com/gigaspaces/xap/9.7.0-10496-RELEASE/gigaspaces-xap-premium-9.7.0-ga-b10496.zip"
+
 
         // Mandatory. The prefix for new machines started for servies.
         machineNamePrefix "itests-cloudify-agent-"
@@ -91,9 +97,9 @@ cloud {
 
                 SMALL_BLOCK : storageTemplate{
                     deleteOnExit true
-                    size 10
+                    size 5
                     path "/storage"
-                    namePrefix "itests-storage-volume"
+                    namePrefix "cloudify-storage-volume"
                     deviceName "/dev/sdc"
                     fileSystemType "ext4"
                     custom ([:])
@@ -107,6 +113,7 @@ cloud {
          * Cloud machine templates available with this cloud.
          */
         templates ([
+                // Mandatory. Template Name.
                 SMALL_LINUX : computeTemplate{
                     // Mandatory. Image ID.
                     imageId linuxImageId
@@ -124,44 +131,7 @@ cloud {
                     // are not used.
                     keyFile keyFile
 
-                    username "ec2-user"
-                    // Additional template options.
-                    // When used with the default driver, the option names are considered
-                    // method names invoked on the TemplateOptions object with the value as the parameter.
-                    options ([
-                            "securityGroups" : ["default"]as String[],
-                            "keyPair" : keyPair
-                    ])
-
-                    // Optional. Overrides to default cloud driver behavior.
-                    // When used with the default driver, maps to the overrides properties passed to the ComputeServiceContext a
-                    overrides (["jclouds.ec2.ami-query":"",
-                            "jclouds.ec2.cc-ami-query":""])
-
-                    // enable sudo.
-                    privileged true
-                    //initializationCommand "ulimit -n 4000"
-
-
-
-                },
-                // Mandatory. Template Name.
-                MEDIUM_LINUX : computeTemplate{
-                    // Mandatory. Image ID.
-                    imageId mediumImageId
-                    // Mandatory. Files from the local directory will be copied to this directory on the remote machine.
-                    remoteDirectory "/home/ec2-user/gs-files"
-                    // Mandatory. Amount of RAM available to machine.
-                    machineMemoryMB 3600
-                    // Mandatory. Hardware ID.
-                    hardwareId mediumHardwareId
-                    // Optional. Location ID.
-                    locationId locationId
-                    // Mandatory. All files from this LOCAL directory will be copied to the remote machine directory.
-                    localDirectory "upload"
-                    // Optional. Name of key file to use for authenticating to the remot machine. Remove this line if key files
-                    // are not used.
-                    keyFile keyFile
+                    openFilesLimit "32000"
 
                     username "ec2-user"
                     // Additional template options.
@@ -172,6 +142,9 @@ cloud {
                             "keyPair" : keyPair
                     ])
 
+                    // when set to 'true', agent will automatically start after reboot.
+                    autoRestartAgent true
+
                     // Optional. Overrides to default cloud driver behavior.
                     // When used with the default driver, maps to the overrides properties passed to the ComputeServiceContext a
                     overrides (["jclouds.ec2.ami-query":"",
@@ -179,14 +152,13 @@ cloud {
 
                     // enable sudo.
                     privileged true
-                    //initializationCommand "ulimit -n 4000"
 
 
 
                 },
+
                 // Mandatory. Template Name.
                 LARGE_LINUX : computeTemplate{
-                    openFilesLimit "81920"
                     // Mandatory. Image ID.
                     imageId largeImageId
                     // Mandatory. Files from the local directory will be copied to this directory on the remote machine.
@@ -203,6 +175,8 @@ cloud {
                     // are not used.
                     keyFile keyFile
 
+                    openFilesLimit "32000"
+
                     username "ec2-user"
                     // Additional template options.
                     // When used with the default driver, the option names are considered
@@ -219,7 +193,7 @@ cloud {
 
                     // enable sudo.
                     privileged true
-                    //initializationCommand "ulimit -n 4000"                       
+                    //initializationCommand "ulimit -n 4000"
                 },
 
                 // Mandatory. Template Name.
@@ -239,7 +213,9 @@ cloud {
                     // Optional. Name of key file to use for authenticating to the remot machine. Remove this line if key files
                     // are not used.
                     keyFile keyFile
-                    1
+
+                    openFilesLimit "32000"
+
                     username "ec2-user"
                     // Additional template options.
                     // When used with the default driver, the option names are considered
@@ -278,6 +254,8 @@ cloud {
                     // are not used.
                     keyFile keyFile
 
+                    openFilesLimit "32000"
+
                     username "ubuntu"
                     // Additional template options.
                     // When used with the default driver, the option names are considered
@@ -286,6 +264,9 @@ cloud {
                             "securityGroups" : ["default"]as String[],
                             "keyPair" : keyPair
                     ])
+
+                    // when set to 'true', agent will automatically start after reboot.
+                    autoRestartAgent true
 
                     // Optional. Overrides to default cloud driver behavior.
                     // When used with the default driver, maps to the overrides properties passed to the ComputeServiceContext a
@@ -308,7 +289,7 @@ cloud {
                     // Mandatory. Amount of RAM available to machine.
                     machineMemoryMB 3500
                     // Mandatory. Hardware ID.
-                    hardwareId hardwareId
+                    hardwareId mediumHardwareId
                     // Optional. Location ID.
                     locationId locationId
                     // Mandatory. All files from this LOCAL directory will be copied to the remote machine directory.
@@ -316,6 +297,8 @@ cloud {
                     // Optional. Name of key file to use for authenticating to the remot machine. Remove this line if key files
                     // are not used.
                     keyFile keyFile
+
+                    openFilesLimit "32000"
 
                     username "ubuntu"
                     // Additional template options.
@@ -325,6 +308,9 @@ cloud {
                             "securityGroups" : ["default"]as String[],
                             "keyPair" : keyPair
                     ])
+
+                    // when set to 'true', agent will automatically start after reboot.
+                    autoRestartAgent true
 
                     // Optional. Overrides to default cloud driver behavior.
                     // When used with the default driver, maps to the overrides properties passed to the ComputeServiceContext a
@@ -343,5 +329,8 @@ cloud {
     /*****************
      * Optional. Custom properties used to extend existing drivers or create new ones.
      */
-    custom ([:])
+    custom ([
+            "org.cloudifysource.clearRemoteDirectoryOnStart" : true,
+            "org.cloudifysource.stop-management-timeout-in-minutes" : 15
+    ])
 }

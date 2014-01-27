@@ -34,12 +34,12 @@ In order to update this build you should:
 	1.1 This build should BigData and should be in s3 (publish builds)
 2. In the updated build the ec2 cloud folder should be updated - in order to support large machines with custom configurations in the cloud driver as well as pem file in the upload folder.
 	2.2 An example of ec2 folder is located in /export/tgrid/itests-deployer/ec2 and could be copied into the new tester build.
-3. Update scripts in /export/tgrid/itests-deployer/Cloudify-iTests-Deployer/src/main/resources/services/iTests-Management (mysql,tomcat) and in 
+3. (deprecated) Update scripts in /export/tgrid/itests-deployer/Cloudify-iTests-Deployer/src/main/resources/services/iTests-Management (mysql,tomcat) and in
    /export/tgrid/itests-deployer/Cloudify-iTests-Deployer/src/main/resources/services/cloudify-itests-service (install,start,stop) to make them run and compile in the tester build.
-4. Update credentials folder (/export/tgrid/itests-deployer/credentials) if any chances were made to it in SVN.
+4. (deprecated) Update credentials folder (/export/tgrid/itests-deployer/credentials) if any chances were made to it in SVN.
 
-IMPORTANT NOTE:
-The TESTER version now is 9.6.0 GA - therefore groovy scripts are suitable to CloudifyRecipes branch 2.6.0 (mysql,tomcat and all groovy scripts in itests-service).
+(deprecated) IMPORTANT NOTE:
+The TESTER version now is 9.7.0 GA - therefore groovy scripts are suitable to CloudifyRecipes branch 2.7.0 (mysql,tomcat and all groovy scripts in itests-service).
 In order to change the TESTER version to newer version you should update all groovy scripts so compilation errors won't occur.
 
 GIT PROJECT:
