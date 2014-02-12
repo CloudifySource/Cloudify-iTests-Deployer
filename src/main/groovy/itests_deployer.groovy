@@ -17,7 +17,7 @@ logger.info "path: ${scriptDir}"
 println scriptDir
 
 commandOptions = "--verbose -timeout 20"
-installServiceCommandOptions = "--verbose -timeout 30"
+installServiceCommandOptions = "--verbose -timeout 50"
 deployerPropertiesFile = new File("${scriptDir}/deployer.properties")
 config = new ConfigSlurper().parse(deployerPropertiesFile.text)
 deployerStaticConfigFile = new File("/export/tgrid/itests-deployer/deployer-config.properties")
