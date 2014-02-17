@@ -245,8 +245,8 @@ else{
     }
     logger.info "uninstalled iTest service successfully"
 
-    logger.info "removing ${props['testRunId']} service dir"
-    def workingDir = new File("${scriptDir}/${props['testRunId']}")
+    logger.info "removing ${scriptDir}/../../../.. main dir"
+    def workingDir = new File("${scriptDir}/../../../..")
 
     def deleteClosure
 
