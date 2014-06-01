@@ -7,13 +7,6 @@ import utils.DumpUtils
  * Time: 15:48
  */
 
-@GrabResolver(name='org.openspaces', root='http://maven-repository.openspaces.org/')
-//@GrabResolver(name='JBossThirdpartyReleases', root='https://repository.jboss.org/nexus/content/repositories/thirdparty-releases/')
-@Grapes([
-@Grab(group='org.apache.commons', module='commons-io', version='1.3.2'),
-@Grab(group='org.cloudifysource', module='rest-client', version='2.7.1-SNAPSHOT')])
-
-
 //variable definitions
 logger = Logger.getLogger(this.getClass().getName())
 //scriptDir = new File(getClass().protectionDomain.codeSource.location.path).getParentFile().getAbsolutePath()
