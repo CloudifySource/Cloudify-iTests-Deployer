@@ -233,7 +233,7 @@ else{
         logger.info "test run ${props['testRunId']} still has ${count} suites running"
         sleep TimeUnit.MINUTES.toMillis(1)
     }
-    DumpUtils.dumpServiceLogs("${staticConfig.MGT_MACHINE}:8100", "/export/tgrid/itests-deployer/logs");
+    DumpUtils.dumpServiceLogs("http://${staticConfig.MGT_MACHINE}:8100/", "/export/tgrid/itests-deployer/logs");
     logger.info "sleeping"
     sleep(1000*60*5)
     logger.info "uninstalling iTests service..."
