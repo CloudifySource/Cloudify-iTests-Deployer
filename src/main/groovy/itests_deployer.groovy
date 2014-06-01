@@ -1,7 +1,5 @@
 import java.util.concurrent.TimeUnit
 import java.util.logging.Logger
-import utils.DumpUtils
-
 /**
  * User: Sagi Bernstein
  * Date: 27/02/13
@@ -233,7 +231,7 @@ else{
         logger.info "test run ${props['testRunId']} still has ${count} suites running"
         sleep TimeUnit.MINUTES.toMillis(1)
     }
-    DumpUtils.dumpServiceLogs("http://${staticConfig.MGT_MACHINE}:8100/", "/export/tgrid/itests-deployer/logs");
+    //DumpUtils.dumpServiceLogs("http://${staticConfig.MGT_MACHINE}:8100/", "/export/tgrid/itests-deployer/logs");
     logger.info "sleeping"
     sleep(1000*60*5)
     logger.info "uninstalling iTests service..."
