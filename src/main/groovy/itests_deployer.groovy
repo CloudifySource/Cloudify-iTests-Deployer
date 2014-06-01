@@ -1,12 +1,17 @@
 import java.util.concurrent.TimeUnit
 import java.util.logging.Logger
-
+import utils.DumpUtils
 /**
  * User: Sagi Bernstein
  * Date: 27/02/13
  * Time: 15:48
  */
 
+@GrabResolver(name='org.openspaces', root='http://maven-repository.openspaces.org/')
+//@GrabResolver(name='JBossThirdpartyReleases', root='https://repository.jboss.org/nexus/content/repositories/thirdparty-releases/')
+@Grapes([
+@Grab(group='org.apache.commons', module='commons-io', version='1.3.2'),
+@Grab(group='org.cloudifysource', module='rest-client', version='2.7.1-SNAPSHOT')])
 
 
 //variable definitions
@@ -234,7 +239,7 @@ else{
         logger.info "test run ${props['testRunId']} still has ${count} suites running"
         sleep TimeUnit.MINUTES.toMillis(1)
     }
-
+    DumpUtils.dumpServiceLogs("${staticConfig.MGT_MACHINE}:8100", "/export/tgrid/itests-deployer/logs");
     logger.info "sleeping"
     sleep(1000*60*5)
     logger.info "uninstalling iTests service..."
